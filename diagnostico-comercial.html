@@ -12,6 +12,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
+  html{
+    scrollbar-gutter: stable;
+  }
   :root{
     --naranja:#e35f2b;
     --naranja-soft:rgba(240,90,18,0.18);
@@ -43,7 +46,7 @@
     margin:0;
     font-family:'Inter',sans-serif;
     background:var(--bg);
-    color:var(--ink);
+    color:var(--grafito);
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
   }
@@ -258,15 +261,14 @@
 
   .weak-wrap{margin-top:26px;}
   .weak-card{
-    border:1px solid var(--borde);border-left:4px solid var(--naranja);
-    background:var(--blanco);border-radius:0 var(--radius-md) var(--radius-md) 0;padding:14px 18px;margin-top:10px;
-    box-shadow:var(--shadow);
+    border:1px solid var(--borde);
+    background:var(--fondo);border-radius:var(--radius-md);padding:16px 18px;margin-top:10px;
   }
   .weak-card h4{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
   .weak-card p{font-size:13.5px;color:#5B5B5D;margin:7px 0 0;line-height:1.5;}
   .weak-card .score-tag{
-    font-family:'Inter',sans-serif;font-size:12px;font-weight:700;color:#fff;
-    padding:3px 9px;border-radius:12px;
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:#fff;line-height:1;
+    padding:4px 9px;border-radius:12px;
   }
 
   /* ---------- Section 3 items ---------- */
@@ -370,6 +372,189 @@
 
   ::-webkit-scrollbar{width:8px;}
   ::-webkit-scrollbar-thumb{background:#D8D6D2;border-radius:4px;}
+
+  /* ===================================================================
+     Añadido: estilos para las vistas/componentes que ya generaba el motor
+     de la app (guardado de diagnósticos en el navegador, panel 360°, KPIs,
+     etc.) pero que esta hoja de estilos aún no cubría. Mismo lenguaje
+     visual: Inter, paleta --naranja/--grafito, radios y sombra existentes.
+     =================================================================== */
+
+  /* ---------- Navbar: marca/contexto + tabs ---------- */
+  .navbar-brand{display:flex;align-items:center;justify-content:flex-end;}
+  .navbar-context{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--gris);
+  }
+  .navbar-context:empty{display:none;}
+  /* si no hay contexto (nombre de empresa) ni tabs -> vista landing: ocultar la barra */
+  .navbar:has(.tabs:empty):has(.navbar-context:empty){display:none;}
+  .tab-btn.nav-back{background:var(--fondo);}
+
+  /* ---------- Landing: "Mis diagnósticos" (guardado en el navegador) ---------- */
+  /* El botón "+ Nuevo diagnóstico" vive en el hero y solo se muestra en esta vista */
+  #btn-new-case{display:none;}
+  body.view-landing #btn-new-case{display:flex;}
+
+  .landing-card{
+    background:var(--surface);border:1px solid var(--borde);border-radius:var(--radius-lg);
+    padding:26px 30px 30px;box-shadow:var(--shadow);
+  }
+  .landing-hero{padding:0;}
+  .landing-hero h2{font-size:22px;font-weight:800;letter-spacing:-0.01em;}
+  .landing-hero p{color:var(--text-muted);font-size:14px;margin-top:8px;max-width:600px;}
+
+  .empty-state{
+    margin-top:22px;border:1.5px dashed var(--borde);border-radius:var(--radius-md);padding:40px;
+    text-align:center;color:var(--gris);font-size:14px;background:var(--fondo);
+  }
+
+  .case-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:22px;}
+  .case-card{
+    background:var(--fondo);border:1px solid var(--borde);border-radius:var(--radius-md);padding:18px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .case-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .case-card-top h3{font-size:16px;font-weight:700;line-height:1.3;}
+  .icon-btn{background:none;border:none;cursor:pointer;font-size:15px;opacity:.55;padding:2px;color:var(--grafito);}
+  .icon-btn:hover{opacity:1;}
+  .icon-btn.danger:hover{color:var(--rojo);}
+  .case-meta{font-size:12px;color:var(--gris);}
+  .case-progress{display:flex;gap:10px;font-size:11.5px;color:var(--grafito);font-weight:600;margin-top:2px;flex-wrap:wrap;}
+  .btn-open-case{
+    margin-top:10px;background:#fff;border:1.5px solid var(--borde);border-radius:var(--radius-sm);
+    padding:9px 12px;font-family:'Inter',sans-serif;font-weight:700;font-size:12.5px;
+    cursor:pointer;text-align:left;color:var(--grafito);transition:all .12s ease;
+  }
+  .btn-open-case:hover{border-color:var(--naranja);color:var(--naranja);}
+
+  /* ---------- Modal de confirmación (eliminar diagnóstico) ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(26,26,26,.55);display:flex;align-items:center;justify-content:center;z-index:200;
+  }
+  .modal-box{background:#fff;border-radius:var(--radius-lg);padding:24px;max-width:360px;width:90%;box-shadow:var(--shadow);}
+  .modal-box p{font-size:14px;color:var(--grafito);line-height:1.5;margin:0 0 18px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;}
+  .modal-btn{
+    font-family:'Inter',sans-serif;font-weight:700;font-size:13px;padding:9px 16px;border-radius:var(--radius-sm);
+    border:1.5px solid var(--borde);background:#fff;cursor:pointer;color:var(--grafito);transition:all .12s ease;
+  }
+  .modal-btn.confirm{background:var(--rojo);border-color:var(--rojo);color:#fff;}
+  .modal-btn.cancel:hover{border-color:var(--gris);}
+
+  /* ---------- Toggle POSITIVO / NEGATIVO / N/A ---------- */
+  .pn-btn.na.selected{background:var(--gris);border-color:var(--gris);color:#fff;}
+  .na-flag{
+    font-size:10px;color:var(--gris);border:1px solid var(--gris);
+    padding:2px 6px;border-radius:10px;margin-left:8px;text-transform:uppercase;
+    letter-spacing:.04em;font-weight:600;white-space:nowrap;
+  }
+
+  /* ---------- Resumen ejecutivo / hallazgos / preguntas guía ---------- */
+  .resumen-box{
+    margin-top:20px;background:var(--accent-soft);border:1px solid var(--naranja-soft);
+    border-radius:var(--radius-md);padding:14px 18px;font-size:13.5px;color:#5B4433;line-height:1.55;
+  }
+  .tipo-badge{
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:#fff;line-height:1;
+    padding:4px 9px;border-radius:12px;text-transform:uppercase;letter-spacing:.03em;
+  }
+  .hallazgo{font-size:13.5px;color:#3f3f41;line-height:1.55;margin-top:9px;}
+  .questions-block{margin-top:12px;}
+  .qb-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--gris);font-weight:600;margin-bottom:5px;}
+  .q-list{margin:0;padding-left:18px;}
+  .q-list li{font-size:13px;color:#3f3f41;margin-top:4px;line-height:1.45;}
+
+  /* ---------- KPIs sugeridos / edición de KPI ---------- */
+  .kpi-block{margin-top:14px;border-top:1px dashed var(--borde);padding-top:12px;}
+  .kpi-suggest{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    padding:9px 0;
+  }
+  .kpi-suggest + .kpi-suggest{border-top:1px dashed var(--borde);}
+  .kpi-suggest-label{font-size:12.5px;color:var(--grafito);}
+  .kpi-actions{display:flex;gap:8px;}
+  .kpi-skipped{font-size:12.5px;color:var(--gris);font-style:italic;}
+  .mini-btn{
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:700;line-height:1;padding:8px 14px;border-radius:20px;
+    border:1.5px solid var(--naranja);background:var(--naranja);color:#fff;cursor:pointer;white-space:nowrap;
+    text-transform:uppercase;letter-spacing:.03em;transition:all .12s ease;
+  }
+  .mini-btn.ghost{background:#fff;color:var(--gris);border-color:var(--borde);margin-top:12px;}
+  .mini-btn.ghost:hover{border-color:var(--naranja);color:var(--naranja);}
+  .mini-btn:disabled{background:#D7D5D0;border-color:#D7D5D0;color:#8A8A8D;cursor:not-allowed;}
+
+  .kpi-added{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .kpi-added-grid{
+    display:grid;grid-template-columns:repeat(4,1fr) auto;gap:10px;align-items:end;
+    background:var(--fondo);border:1px solid var(--borde);border-radius:var(--radius-sm);padding:12px;margin-top:8px;
+  }
+  @media(max-width:720px){.kpi-added-grid{grid-template-columns:repeat(2,1fr);}}
+  .kpi-field{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .kpi-field label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--gris);font-weight:600;}
+  .kpi-remove-btn{white-space:nowrap;padding-bottom:9px;}
+  .kpi-input{
+    flex:1;min-width:140px;border:1.5px solid var(--borde);border-radius:var(--radius-sm);padding:7px 9px;font-size:12.5px;
+    font-family:'Inter',sans-serif;background:#fff;color:var(--grafito);
+  }
+  .kpi-input:focus{outline:none;border-color:var(--naranja);}
+  .link-btn{background:none;border:none;color:var(--naranja);font-size:12px;font-weight:700;cursor:pointer;padding:0;}
+  .link-btn.danger{color:var(--rojo);}
+
+  /* ---------- Chips de tema / correlación ---------- */
+  .theme-chips{margin-top:8px;}
+  .theme-chip{display:inline-block;font-size:11px;padding:4px 9px;border-radius:12px;margin:3px 4px 0 0;font-weight:700;}
+  .theme-chip.weak{background:var(--rojo);color:#fff;}
+  .theme-chip.ok{background:var(--verde);color:#fff;}
+  .theme-chip.pending{background:var(--fondo);color:var(--gris);border:1px dashed var(--borde);}
+  .theme-chip.off{background:#F2F1EE;color:#B9B7B2;}
+  .weak-card.theme-confirmed{border-color:var(--rojo);}
+
+  .kpi-summary-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .kpi-summary-row{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:#fff;border:1px solid var(--borde);border-radius:var(--radius-sm);padding:10px 12px;}
+  .kpi-summary-row .kpi-added-grid{width:100%;background:transparent;border:none;padding:0;margin-top:0;}
+  .kpi-summary-tag{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:700;color:var(--gris);background:var(--fondo);padding:3px 8px;border-radius:10px;white-space:nowrap;}
+
+  /* ---------- Panel 360°: síntesis (snapshots + distribución + brief) ---------- */
+  .snapshot-row{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;}
+  .snapshot-card{flex:1;min-width:160px;background:#fff;border:1px solid var(--borde);border-radius:var(--radius-lg);padding:16px;text-align:center;box-shadow:var(--shadow);}
+  .snapshot-card.empty{background:var(--fondo);border-style:dashed;box-shadow:none;}
+  .snapshot-label{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:8px;}
+  .snapshot-num{font-family:'Inter',sans-serif;font-size:28px;font-weight:800;}
+  .snapshot-tag{display:inline-block;margin-top:6px;font-family:'Inter',sans-serif;font-size:10.5px;font-weight:700;color:#fff;padding:3px 10px;border-radius:12px;text-transform:uppercase;}
+  .snapshot-empty-text{color:var(--gris);font-size:13px;padding:10px 0;}
+
+  .tipo-dist{margin-top:14px;display:flex;flex-direction:column;gap:10px;}
+  .tipo-dist-row{display:flex;align-items:center;gap:10px;}
+  .tipo-dist-label{width:210px;flex:none;font-size:13px;display:flex;align-items:center;gap:7px;}
+  .tipo-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .tipo-dist-track{flex:1;height:10px;background:var(--fondo);border-radius:10px;overflow:hidden;}
+  .tipo-dist-fill{height:100%;border-radius:10px;}
+  .tipo-dist-count{width:20px;text-align:right;font-family:'Inter',sans-serif;font-weight:700;font-size:13px;}
+
+  .brief-box{margin-top:14px;}
+  .brief-textarea{
+    width:100%;min-height:220px;border:1.5px solid var(--borde);border-radius:var(--radius-md);padding:16px;
+    font-family:'Inter',monospace;font-size:12.5px;line-height:1.6;color:var(--grafito);
+    background:#fff;resize:vertical;white-space:pre-wrap;box-sizing:border-box;
+  }
+  .brief-box .mini-btn{margin-top:10px;}
+
+  /* ---------- Guía de arranque (intake) ---------- */
+  .intake-options{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+  .intake-opt{
+    text-align:left;border:1.5px solid var(--borde);border-radius:var(--radius-sm);padding:12px 14px;
+    background:#fff;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--grafito);cursor:pointer;
+    transition:all .12s ease;
+  }
+  .intake-opt:hover{border-color:var(--naranja);}
+  .intake-opt.selected{border-color:var(--naranja);background:var(--accent-soft);font-weight:700;}
+
+  /* ---------- Ocultar controles de edición al exportar a PDF ---------- */
+  .capturing .kpi-actions{display:none;}
+  .capturing .link-btn{display:none;}
+  .capturing .mini-btn{display:none;}
+  .capturing .kpi-suggest{display:none;}
+  #capture-section1.capturing .cat-card.locked{display:none;}
 </style>
 </head>
 <body>
@@ -385,22 +570,26 @@
         <h1>Diagnóstico <span>Comercial</span></h1>
         <p class="sub">Evaluación en tiempo real para identificar oportunidades de mejora de la fuerza de venta.</p>
       </div>
+      <button class="btn-export" id="btn-new-case">+ Nuevo diagnóstico</button>
     </div>
   </div>
 
   <div class="navbar">
     <div class="navbar-inner">
+      <div class="navbar-brand">
+        <span class="navbar-context" id="navbar-context"></span>
+      </div>
       <div class="tabs" id="tabs"></div>
     </div>
   </div>
 
   <div id="sections-wrap"></div>
 
-  <div class="footer-note">SalesBox360 | Diagnóstico Comercial Express — para uso interno de consultores certificados</div>
+  <div class="footer-note">Diagnóstico Comercial | SalesBox360 — para uso interno de consultores certificados.</div>
 </div>
 
 <script>
-/* ============== DATA ============== */
+/* ============== DATA: PREGUNTAS ============== */
 const SECTION1_DATA = [
   { name:"Estrategia Comercial", items:[
     "Está bien definida y por escrito",
@@ -530,23 +719,324 @@ const SECTION3_DEFAULT = [
   "Organización","Proactividad","Creatividad comercial"
 ];
 
-const RECO_TEMPLATES = [
-  (n)=>`Existe una oportunidad de fortalecer "${n}" mediante acompañamiento estructurado que ayude a consolidar procesos, herramientas y hábitos en esta área.`,
-  (n)=>`"${n}" muestra espacio de mejora. Un proceso de intervención guiada podría ayudar a instalar disciplina y buenas prácticas de forma sostenida.`,
-  (n)=>`Se identifica una brecha en "${n}". Formalizar esta área con acompañamiento especializado facilitaría resultados más consistentes.`
-];
-function recoText(name, idx){ return RECO_TEMPLATES[idx % RECO_TEMPLATES.length](name); }
-
-/* ============== STATE ============== */
-const state = {
-  header: { empresa:"", evaluador:"", cargo:"", fecha:new Date().toISOString().slice(0,10) },
-  currentTab: 1,
-  s1: SECTION1_DATA.map(c => ({ name:c.name, items:c.items.map(()=>null) })),
-  s2: SECTION2_DATA.map(c => ({ name:c.name, items:c.items.map(()=>null), locked:false })),
-  s3: SECTION3_DEFAULT.map(n => ({ name:n, enabled:true, score:null, answered:false }))
+/* ============== DATA: INSIGHTS (conclusiones por categoría/competencia) ============== */
+const TIPO_COLORS = {
+  "Formación": "#F05A12",
+  "Liderazgo y gestión": "#4D4D4F",
+  "Proceso y herramientas": "#6b6b6d",
+  "Adopción de IA": "#C24A0E",
+  "Acompañamiento sostenido": "#8A8A8D"
 };
 
-/* ============== HELPERS ============== */
+const S1_INSIGHTS = [
+  { questions:[
+      "¿Cómo describirían hoy su estrategia comercial si se la explicaran a alguien nuevo del equipo?",
+      "¿Qué pasa cuando el mercado cambia y la estrategia no se ha actualizado en meses?",
+      "¿Cómo saben, en números, si la estrategia está funcionando o no?"
+    ], kpis:["% de cumplimiento del plan de acción estratégico", "Frecuencia de revisión estratégica (veces/año)", "% del equipo que puede explicar la estrategia sin ayuda"], tipo:"Liderazgo y gestión" },
+  { questions:[
+      "¿Cómo es una reunión comercial típica con el equipo hoy?",
+      "¿Qué tan seguido los líderes acompañan a los vendedores en campo o en llamadas reales?",
+      "¿Cómo se enteran los líderes de que un vendedor necesita ayuda antes de que sea tarde?"
+    ], kpis:["Frecuencia de acompañamiento comercial (sesiones/mes)", "% de reuniones comerciales con seguimiento documentado", "Índice de feedback recibido por el equipo (encuesta interna)"], tipo:"Liderazgo y gestión" },
+  { questions:[
+      "¿Cómo aprende hoy un vendedor nuevo a vender aquí?",
+      "¿Qué pasa si un vendedor lleva 6 meses sin ninguna formación?",
+      "¿Cómo saben qué brechas de habilidades tiene cada vendedor?"
+    ], kpis:["Horas de formación comercial por vendedor al año", "% de vendedores con evaluación de desempeño reciente", "Tiempo promedio de inducción de un vendedor nuevo (días)"], tipo:"Formación" },
+  { questions:[
+      "¿Dónde queda registrada la actividad comercial de cada vendedor hoy?",
+      "¿Qué pasa si un vendedor se va mañana — se pierde la información de sus clientes?",
+      "¿Cómo saben, sin preguntarle al vendedor, qué tan activo está siendo esta semana?"
+    ], kpis:["% de actividad comercial registrada en CRM o formato", "% de procesos de venta documentados y en uso", "Frecuencia de revisión de KPIs comerciales (veces/año)"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Cómo se celebra o reconoce un buen resultado de venta aquí?",
+      "¿Qué tanto se habla de resultados de venta fuera de las reuniones formales?",
+      "Si le preguntara a un vendedor cualquiera qué se siente trabajar aquí, ¿qué me diría?"
+    ], kpis:["Índice de motivación/clima del equipo comercial", "% de logros de venta reconocidos formalmente", "% del equipo usando IA de forma metódica en su gestión"], tipo:"Acompañamiento sostenido" }
+];
+
+const S2_INSIGHTS = [
+  { questions:[
+      "¿Cuántos prospectos nuevos contactan en una semana típica?",
+      "¿Qué pasa las semanas que no cumplen la cuota de prospección?",
+      "¿Cómo deciden a quién prospectar primero?"
+    ], kpis:["Nº de prospectos nuevos contactados por semana", "% de cumplimiento de la cuota de prospección", "Tasa de conversión de prospecto a primera reunión"], tipo:"Formación" },
+  { questions:[
+      "¿Cómo saben si están generando confianza real con un cliente en la primera reunión?",
+      "¿Qué tan distinto le hablan a un cliente analítico versus uno más relacional?",
+      "¿Qué feedback reciben los vendedores sobre su forma de comunicarse?"
+    ], kpis:["Tasa de avance a segunda reunión tras primer contacto", "% de clientes que califican la comunicación como clara/efectiva", "Nº de feedbacks de comunicación recibidos por vendedor al mes"], tipo:"Formación" },
+  { questions:[
+      "¿Qué porcentaje de las reuniones comerciales termina en una oportunidad real de negocio?",
+      "¿Cómo descubren hoy la necesidad real del cliente antes de hablar de su producto?",
+      "¿Qué pasa si el vendedor asume la necesidad en vez de confirmarla?"
+    ], kpis:["Nº de oportunidades comerciales generadas por mes", "% de reuniones que terminan en oportunidad real", "Tiempo promedio para identificar la necesidad del cliente"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Cómo se preparan hoy antes de presentar una propuesta a un cliente importante?",
+      "¿Qué tan seguido pierden una venta por no lograr comunicar bien el valor?",
+      "¿Todos los vendedores presentan de la misma forma o cada uno improvisa la suya?"
+    ], kpis:["Tasa de avance de propuesta presentada a negociación", "% de propuestas perdidas por falta de claridad en el valor", "Nº de presentaciones estandarizadas usadas por el equipo"], tipo:"Formación" },
+  { questions:[
+      "¿Cuáles son las 2 o 3 objeciones que más se repiten y cómo las manejan hoy?",
+      "¿Cuánto tiempo pasa en promedio entre la propuesta y la decisión del cliente?",
+      "¿Qué porcentaje de las negociaciones se cae en la recta final?"
+    ], kpis:["Tasa de cierre / efectividad de conversión", "Tiempo promedio entre propuesta y decisión del cliente", "% de negociaciones perdidas en la etapa final"], tipo:"Formación" },
+  { questions:[
+      "¿Dónde queda registrado el compromiso de seguimiento después de cada reunión?",
+      "¿Cuántas oportunidades se han perdido este año solo por falta de seguimiento a tiempo?",
+      "¿Cómo se aseguran de que ningún prospecto quede \"en el limbo\"?"
+    ], kpis:["% de oportunidades con seguimiento a tiempo", "Nº de oportunidades perdidas por falta de seguimiento (últimos 6 meses)", "Tiempo promedio de respuesta a un compromiso de seguimiento"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Con qué frecuencia revisan la cartera de clientes buscando oportunidades adicionales?",
+      "¿Qué tan bien conoce el equipo todo el portafolio, no solo lo que más vende?",
+      "¿Qué porcentaje de sus clientes actuales tiene más de un producto o servicio con ustedes?"
+    ], kpis:["Nº promedio de productos/servicios por cliente", "% de clientes con más de un producto contratado", "Frecuencia de revisión de cartera para cross-selling (veces/año)"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué herramientas de IA está usando hoy el equipo comercial, si alguna?",
+      "¿Quién decide qué IA se adopta y cómo se comunica al equipo?",
+      "¿Qué pasaría si su competencia ya está usando IA para vender más rápido que ustedes?"
+    ], kpis:["% del equipo usando activamente herramientas de IA", "Nº de procesos comerciales apoyados por IA", "% de mejora en productividad atribuible a IA (autopercibido)"], tipo:"Adopción de IA" }
+];
+
+const S3_INSIGHTS = [
+  { questions:[
+      "¿Cuántas prospecciones nuevas hace en una semana normal?",
+      "¿Qué método usa para decidir a quién contactar primero?"
+    ], kpis:["Nº de prospecciones activas por semana", "% de cumplimiento de meta personal de prospección", "Tasa de conversión de prospección a primera cita"], tipo:"Formación" },
+  { questions:[
+      "¿Qué información busca antes de la primera reunión con un prospecto?",
+      "¿Cómo distingue un cliente con potencial real de uno que no lo tiene?"
+    ], kpis:["% de prospectos correctamente calificados antes de la reunión", "Tiempo promedio dedicado a investigar un prospecto", "% de reuniones con prospectos mal calificados (bajo potencial)"], tipo:"Formación" },
+  { questions:[
+      "¿Cómo adapta su forma de comunicar según el tipo de cliente que tiene enfrente?",
+      "¿Qué feedback ha recibido sobre su estilo de comunicación?"
+    ], kpis:["Tasa de avance a la siguiente etapa tras la conversación", "Nº de objeciones de comunicación reportadas por clientes", "% de clientes que califican la claridad de la comunicación"], tipo:"Formación" },
+  { questions:[
+      "¿Sigue una estructura definida en sus reuniones o improvisa según el momento?",
+      "¿Qué porcentaje de sus reuniones terminan con un siguiente paso claro?"
+    ], kpis:["% de reuniones con siguiente paso definido", "Duración promedio de una reunión comercial", "% de reuniones con agenda o estructura previa"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué preguntas usa para descubrir la necesidad real del cliente, más allá de lo obvio?",
+      "¿Con qué frecuencia el cliente le corrige la necesidad que usted asumió?"
+    ], kpis:["% de propuestas alineadas a la necesidad validada del cliente", "Nº de preguntas de descubrimiento usadas por reunión", "% de veces que el cliente corrige la necesidad asumida"], tipo:"Formación" },
+  { questions:[
+      "¿Qué técnicas usa hoy para reforzar sus argumentos de venta?",
+      "¿Qué tan seguido siente que \"convence\" versus que simplemente \"informa\"?"
+    ], kpis:["Tasa de conversión de propuesta a decisión positiva", "Nº de argumentos de venta dominados por el vendedor", "% de propuestas aceptadas en primera instancia"], tipo:"Formación" },
+  { questions:[
+      "¿Cuáles son las objeciones que más le cuesta manejar?",
+      "¿Qué tan seguido cierra en la primera reunión de negociación versus en varias rondas?"
+    ], kpis:["Tasa de cierre personal", "Nº de objeciones manejadas exitosamente por mes", "Tiempo promedio del ciclo de negociación"], tipo:"Formación" },
+  { questions:[
+      "¿Cómo organiza hoy sus pendientes de seguimiento?",
+      "¿Cuántas oportunidades cree que se le han enfriado por falta de seguimiento a tiempo?"
+    ], kpis:["% de seguimientos realizados a tiempo", "Nº de oportunidades enfriadas por falta de seguimiento", "Tiempo promedio de respuesta a un cliente en seguimiento"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué pasa con el cliente después de que firma?",
+      "¿Cómo se entera si el cliente quedó satisfecho o tiene un problema?"
+    ], kpis:["Índice de satisfacción postventa / NPS", "% de clientes contactados después de la venta", "Nº de incidencias postventa resueltas a tiempo"], tipo:"Acompañamiento sostenido" },
+  { questions:[
+      "¿Con qué frecuencia revisa su cartera buscando oportunidades adicionales?",
+      "¿Qué tan bien conoce todo el portafolio disponible para ofrecer?"
+    ], kpis:["Nº de ventas cruzadas cerradas por trimestre", "% de cartera revisada para oportunidades adicionales", "Nº promedio de productos ofrecidos por cliente activo"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Cómo planifica su semana comercial?",
+      "¿Qué tan seguido se le pierde o retrasa una tarea comercial importante?"
+    ], kpis:["% de actividad comercial registrada y al día", "Nº de tareas comerciales retrasadas por semana", "% de cumplimiento del plan semanal personal"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué hace en un día con pocas reuniones agendadas?",
+      "¿Qué tan seguido genera oportunidades sin que se las asignen?"
+    ], kpis:["Nº de oportunidades autogeneradas por mes", "% de días con actividad comercial iniciada sin asignación", "Nº de iniciativas propuestas por el vendedor al trimestre"], tipo:"Acompañamiento sostenido" },
+  { questions:[
+      "¿Puede darme un ejemplo reciente de algo distinto que intentó para cerrar una venta difícil?",
+      "¿Qué tan cómodo se siente saliéndose del guion cuando el enfoque tradicional no funciona?"
+    ], kpis:["Nº de tácticas o enfoques distintos probados por trimestre", "% de ventas cerradas con enfoque no convencional", "Nº de ideas comerciales compartidas con el equipo"], tipo:"Formación" }
+];
+
+/* Cruces temáticos entre secciones para el Panel 360 */
+const THEME_GROUPS = [
+  { name:"Prospección", s2:0, s3:[0] },
+  { name:"Comunicación y persuasión", s2:1, s3:[2,5] },
+  { name:"Generación de oportunidades y reuniones", s2:2, s3:[3,4] },
+  { name:"Presentación y argumentación de ventas", s2:3 },
+  { name:"Negociación y cierre", s2:4, s3:[6] },
+  { name:"Seguimiento comercial", s2:5, s3:[7] },
+  { name:"Venta cruzada", s2:6, s3:[9] },
+  { name:"Adopción de Inteligencia Artificial", s2:7 },
+  { name:"Gestión y organización comercial", s1:3, s3:[10] },
+  { name:"Liderazgo comercial", s1:1 },
+  { name:"Formación del equipo", s1:2 },
+  { name:"Cultura y motivación comercial", s1:4 },
+  { name:"Estrategia comercial", s1:0 },
+  { name:"Postventa", s3:[8] }
+];
+
+/* ============== GUÍA DE ARRANQUE (5 preguntas obligatorias) ============== */
+const SECTION_META = {
+  1:{ name:"Diagnóstico del departamento comercial", tab:1 },
+  2:{ name:"Diagnóstico de la gestión comercial", tab:2 },
+  3:{ name:"Diagnóstico de competencias comerciales", tab:3 }
+};
+const INTAKE_QUESTIONS = [
+  { text:"¿Con quién vas a tener esta conversación?",
+    options:[
+      { label:"Con el dueño, gerente general o gerente comercial (nivel estratégico)", weights:{1:2} },
+      { label:"Con el equipo comercial completo, en su gestión del día a día", weights:{2:2} },
+      { label:"Con un vendedor o líder de equipo en particular", weights:{3:2} }
+    ]},
+  { text:"¿Cuál es el objetivo principal de esta conversación?",
+    options:[
+      { label:"Entender la estructura y dirección comercial de la empresa", weights:{1:2} },
+      { label:"Diagnosticar el proceso de venta del equipo", weights:{2:2} },
+      { label:"Evaluar el desempeño de un vendedor específico", weights:{3:2} }
+    ]},
+  { text:"¿La empresa ya tiene un equipo de ventas formal y estructurado?",
+    options:[
+      { label:"Sí, con procesos y roles claros", weights:{2:2} },
+      { label:"Tiene vendedores, pero sin procesos claros todavía", weights:{1:1, 2:1} },
+      { label:"No aplica — es una sola persona o un equipo muy pequeño", weights:{3:2} }
+    ]},
+  { text:"¿A qué nivel de acceso tienes con el cliente en este momento?",
+    options:[
+      { label:"Solo una reunión corta con el dueño o gerente", weights:{1:2} },
+      { label:"Acceso al equipo de ventas para evaluarlo en conjunto", weights:{2:2} },
+      { label:"Sesión de mentoring o evaluación 1 a 1 con un vendedor", weights:{3:2} }
+    ]},
+  { text:"¿Qué decisión busca tomar el cliente después de esta conversación?",
+    options:[
+      { label:"Definir o ajustar su estrategia comercial", weights:{1:2} },
+      { label:"Mejorar procesos y resultados del equipo de ventas", weights:{2:2} },
+      { label:"Desarrollar o mentorear a un vendedor específico", weights:{3:2} }
+    ]}
+];
+function computeIntakeRecommendation(){
+  const answers = state.intake.answers;
+  if(answers.some(a=>a===null)) return null;
+  const totals = {1:0,2:0,3:0};
+  answers.forEach((optIdx, qi)=>{
+    const opt = INTAKE_QUESTIONS[qi].options[optIdx];
+    Object.entries(opt.weights).forEach(([sec,w])=>{ totals[sec]+=w; });
+  });
+  const max = Math.max(totals[1], totals[2], totals[3]);
+  const top = [1,2,3].filter(s=>totals[s]===max);
+  return { totals, top };
+}
+function renderIntake(){
+  let html = renderFicha();
+  html += `<div class="card" style="margin-top:20px;">
+    <div class="card-title"><span class="sq"></span>Guía de arranque</div>
+    <p style="font-size:13.5px;color:#5B5B5D;margin-top:10px;line-height:1.5;">Responde estas 5 preguntas junto con el cliente antes de elegir qué modalidad del diagnóstico aplicar. Son obligatorias — al completarlas verás la recomendación.</p>
+  </div>`;
+
+  INTAKE_QUESTIONS.forEach((q, qi)=>{
+    const selected = state.intake.answers[qi];
+    html += `<div class="cat-card">
+      <div class="cat-head"><h3>${qi+1}. ${esc(q.text)}</h3></div>
+      <div class="intake-options">
+        ${q.options.map((opt,oi)=>`<button class="intake-opt ${selected===oi?'selected':''}" data-intake-q="${qi}" data-intake-o="${oi}">${esc(opt.label)}</button>`).join("")}
+      </div>
+    </div>`;
+  });
+
+  const answeredCount = state.intake.answers.filter(a=>a!==null).length;
+  const rec = computeIntakeRecommendation();
+  html += `<div class="card" style="margin-top:20px;">`;
+  html += `<div class="results-title" style="margin-top:0;"><h2>Recomendación</h2></div>`;
+  if(!rec){
+    html += `<div class="warn-banner">⚠ Responde las 5 preguntas (van ${answeredCount}/5) para ver qué modalidad conviene aplicar con este cliente.</div>`;
+  } else {
+    html += `<div class="index-hero">
+      <div>
+        <div class="label">Modalidad${rec.top.length>1?'es':''} recomendada${rec.top.length>1?'s':''}</div>
+        <div class="num" style="font-size:22px;">${rec.top.map(s=>esc(SECTION_META[s].name)).join(' + ')}</div>
+      </div>
+    </div>`;
+    html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      ${rec.top.map(s=>`<button class="mini-btn" data-goto-tab="${SECTION_META[s].tab}" type="button">Ir a ${esc(SECTION_META[s].name)} →</button>`).join("")}
+    </div>
+    <p style="color:var(--gris);font-size:13px;margin-top:14px;">Esta es una guía inicial, no una restricción — puedes explorar cualquier otra modalidad si lo consideras útil con este cliente.</p>`;
+  }
+  html += `</div>`;
+  return html;
+}
+function bindIntake(root){
+  root.querySelectorAll('[data-intake-q]').forEach(b=>{
+    b.onclick = ()=>{
+      const qi = +b.dataset.intakeQ, oi = +b.dataset.intakeO;
+      state.intake.answers[qi] = oi;
+      persistCase();
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-goto-tab]').forEach(b=>{
+    b.onclick = ()=>{
+      state.currentTab = +b.dataset.gotoTab;
+      renderAll();
+    };
+  });
+}
+
+/* ============== HELPERS DE TEXTO ============== */
+const HALLAZGO_AREA = [
+  (n,p)=>`"${n}" no está funcionando como práctica consistente hoy: apenas el ${p}% de lo esperado está en marcha.`,
+  (n,p)=>`En "${n}" hay más intención que ejecución real — el ${p}% indica que falta consolidar esto como hábito del equipo.`,
+  (n,p)=>`"${n}" es una de las áreas con mayor brecha (${p}%). Esto suele traducirse en resultados inconsistentes mes a mes.`
+];
+const HALLAZGO_IND = [
+  (n,p)=>`En "${n}" el desempeño está por debajo de lo esperado (${p}%) — vale la pena entender si es un tema de conocimiento, de disciplina o de falta de herramientas.`,
+  (n,p)=>`"${n}" aparece como un punto a reforzar (${p}%): antes de asumir la causa, esto se debe validar directamente con el vendedor.`,
+  (n,p)=>`El puntaje de "${n}" (${p}%) sugiere una oportunidad clara de desarrollo en esta competencia específica.`
+];
+function hallazgoText(name, pct, individual, seed){
+  const bank = individual ? HALLAZGO_IND : HALLAZGO_AREA;
+  return bank[seed % bank.length](name, pct);
+}
+function buildResumen(idx, weakNames, scopeLabel, entity){
+  if((idx===null || idx===undefined) && weakNames.length===0) return null;
+  const withWhom = entity==='el vendedor' ? 'el vendedor evaluado' : 'el cliente';
+  if(weakNames.length===0){
+    return `El panorama en ${scopeLabel} luce sólido${idx!==null?` (${idx}%)`:''}. Vale la pena confirmar con ${withWhom} qué está funcionando bien, más que buscar una intervención correctiva aquí.`;
+  }
+  const names = weakNames.map(n=>`"${n}"`);
+  const joined = names.length===1 ? names[0] : names.slice(0,-1).join(", ")+" y "+names[names.length-1];
+  return `El panorama general en ${scopeLabel}${idx!==null?` está en ${idx}%`:''}, con una brecha clara en ${joined} — son las áreas para profundizar hoy mismo con ${withWhom}.`;
+}
+function esc(s){ return (s||"").toString().replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escAttr(s){ return esc(s).replace(/"/g,"&quot;"); }
+
+/* ============== ALMACENAMIENTO DE CASOS ============== */
+const CASES_KEY = 'sb360_diagnostico_casos_v1';
+function loadCases(){
+  try{ return JSON.parse(localStorage.getItem(CASES_KEY)) || {}; }catch(e){ return {}; }
+}
+function persistCase(){
+  if(!state) return;
+  state.updatedAt = Date.now();
+  const all = loadCases();
+  all[state.id] = state;
+  try{ localStorage.setItem(CASES_KEY, JSON.stringify(all)); }catch(e){ console.error('No se pudo guardar', e); }
+}
+function newState(){
+  return {
+    id: 'case_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    header: { empresa:"", evaluador:"", cargo:"", fecha:new Date().toISOString().slice(0,10) },
+    currentTab: 0,
+    intake: { answers:[null,null,null,null,null] },
+    s1: SECTION1_DATA.map(c => ({ name:c.name, items:c.items.map(()=>null), locked:false })),
+    s2: SECTION2_DATA.map(c => ({ name:c.name, items:c.items.map(()=>null), locked:false })),
+    s3: SECTION3_DEFAULT.map(n => ({ name:n, enabled:true, score:null, answered:false })),
+    kpis: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+}
+
+/* ============== APP STATE ============== */
+let appView = 'landing';
+let state = null;
+
+/* ============== HELPERS DE SCORING ============== */
 function semColor(pct){
   if(pct === null) return "#BEBCB7";
   if(pct < 40) return "var(--rojo)";
@@ -560,10 +1050,11 @@ function semLabel(pct){
   return "Positivo";
 }
 function catPercentS1(cat){
-  const answered = cat.items.filter(v=>v!==null);
-  if(answered.length < cat.items.length) return null;
-  const pos = answered.filter(v=>v===true).length;
-  return Math.round((pos/cat.items.length)*100);
+  if(cat.items.some(v=>v===null)) return null;
+  const scored = cat.items.filter(v=>v!=='na');
+  if(scored.length===0) return null;
+  const pos = scored.filter(v=>v===true).length;
+  return Math.round((pos/scored.length)*100);
 }
 function catPercentS2(cat){
   const answered = cat.items.filter(v=>v!==null);
@@ -576,26 +1067,124 @@ function overallIndex(cats, fn){
   if(pcts.some(p=>p===null)) return null;
   return Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length);
 }
+function withIdx(arr){ return arr.map((c,i)=>({ ...c, origIdx:i })); }
 function weakest(cats, fn, n){
-  return cats.map((c,i)=>({cat:c, pct:fn(c), idx:i}))
+  return cats.map(c=>({cat:c, pct:fn(c)}))
     .filter(x=>x.pct!==null)
     .sort((a,b)=>a.pct-b.pct)
     .slice(0,n);
 }
-function esc(s){ return (s||"").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ============== MODAL DE CONFIRMACIÓN ============== */
+function showConfirmModal(message, onConfirm){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal-box">
+    <p>${esc(message)}</p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modal-cancel">Cancelar</button>
+      <button class="modal-btn confirm" id="modal-confirm">Eliminar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#modal-cancel').onclick = ()=> overlay.remove();
+  overlay.querySelector('#modal-confirm').onclick = ()=>{ overlay.remove(); onConfirm(); };
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+}
 
 /* ============== RENDER: NAV ============== */
 function renderNav(){
+  const tabsEl = document.getElementById('tabs');
+  const ctx = document.getElementById('navbar-context');
+  ctx.textContent = (appView==='case' && state && state.header.empresa) ? state.header.empresa : '';
+  document.body.classList.toggle('view-landing', appView==='landing');
+
+  if(appView==='landing'){
+    tabsEl.innerHTML = '';
+    return;
+  }
   const tabs = [
+    {id:0,label:"Guía de arranque"},
     {id:1,label:"Diagnóstico del departamento comercial"},
     {id:2,label:"Diagnóstico de la gestión comercial"},
-    {id:3,label:"Diagnóstico de competencias comerciales"}
+    {id:3,label:"Diagnóstico de competencias comerciales"},
+    {id:4,label:"Panel 360° · Conclusiones"}
   ];
-  document.getElementById('tabs').innerHTML = tabs.map(t=>`
-    <button class="tab-btn ${state.currentTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>
-  `).join("");
-  document.querySelectorAll('.tab-btn').forEach(b=>{
+  tabsEl.innerHTML = `<button class="tab-btn nav-back" id="btn-back-landing">← Mis diagnósticos</button>` +
+    tabs.map(t=>`<button class="tab-btn ${state.currentTab===t.id?'active':''}" data-tab="${t.id}">${t.label}</button>`).join("");
+  document.getElementById('btn-back-landing').onclick = ()=>{ appView='landing'; renderAll(); };
+  tabsEl.querySelectorAll('[data-tab]').forEach(b=>{
     b.onclick = ()=>{ state.currentTab = parseInt(b.dataset.tab); renderAll(); };
+  });
+}
+
+/* ============== RENDER: LANDING ============== */
+function renderLandingView(){
+  const cases = Object.values(loadCases()).sort((a,b)=>b.updatedAt-a.updatedAt);
+  let html = `<div class="landing-card">
+  <div class="landing-hero">
+    <h2>Tus diagnósticos guardados</h2>
+    <p>Cada diagnóstico se guarda automáticamente en este navegador específicamente, identificado por empresa. Ábrelo para continuar donde lo dejaste o crea uno nuevo para un cliente distinto.</p>
+  </div>`;
+
+  if(cases.length===0){
+    html += `<div class="empty-state">Aún no tienes diagnósticos guardados. Crea el primero con el botón "+ Nuevo diagnóstico" de arriba.</div>`;
+  } else {
+    html += `<div class="case-grid">`;
+    cases.forEach(c=>{
+      const s1visible = c.s1.filter(cat=>!cat.locked);
+      const s1p = s1visible.filter(cat=>cat.items.every(v=>v!==null)).length;
+      const s2visible = c.s2.filter(cat=>!cat.locked);
+      const s2p = s2visible.filter(cat=>cat.items.every(v=>v!==null)).length;
+      const s3enabled = c.s3.filter(i=>i.enabled);
+      const s3p = s3enabled.length ? `${s3enabled.filter(i=>i.answered).length}/${s3enabled.length}` : "—";
+      html += `<div class="case-card">
+        <div class="case-card-top">
+          <h3>${esc(c.header.empresa) || "Sin nombre de empresa"}</h3>
+          <button class="icon-btn danger" data-delete-case data-id="${c.id}" title="Eliminar">🗑</button>
+        </div>
+        <div class="case-meta">${esc(c.header.evaluador)||"Sin evaluador"} · ${c.header.fecha||""}</div>
+        <div class="case-progress">
+          <span>Sección 1: ${s1p}/${s1visible.length}</span><span>Sección 2: ${s2p}/${s2visible.length}</span><span>Sección 3: ${s3p}</span>
+        </div>
+        <button class="btn-open-case" data-open-case data-id="${c.id}">Abrir diagnóstico →</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+function bindLanding(root){
+  const btn = document.getElementById('btn-new-case');
+  if(btn) btn.onclick = ()=>{
+    state = newState();
+    persistCase();
+    appView = 'case';
+    renderAll();
+  };
+  root.querySelectorAll('[data-open-case]').forEach(b=>{
+    b.onclick = ()=>{
+      const all = loadCases();
+      state = all[b.dataset.id];
+      if(!state.kpis) state.kpis = [];
+      state.kpis.forEach(k=>{ if(k.meta===undefined) k.meta=""; if(k.tiempo===undefined) k.tiempo=""; });
+      if(!state.intake) state.intake = { answers:[null,null,null,null,null] };
+      appView = 'case';
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-delete-case]').forEach(b=>{
+    b.onclick = ()=>{
+      const id = b.dataset.id;
+      const all = loadCases();
+      const empresa = (all[id] && all[id].header.empresa) || "este diagnóstico";
+      showConfirmModal(`¿Eliminar el diagnóstico de "${empresa}"? Esta acción no se puede deshacer.`, ()=>{
+        delete all[id];
+        try{ localStorage.setItem(CASES_KEY, JSON.stringify(all)); }catch(e){}
+        renderAll();
+      });
+    };
   });
 }
 
@@ -609,20 +1198,68 @@ function renderFicha(){
     </div>
     <div class="card-title"><span class="sq"></span>Ficha de evaluación</div>
     <div class="ficha-grid">
-      <div class="field"><label>Empresa evaluada</label><input type="text" data-field="empresa" value="${esc(state.header.empresa)}" placeholder="Nombre de la empresa"></div>
-      <div class="field"><label>Nombre del evaluador</label><input type="text" data-field="evaluador" value="${esc(state.header.evaluador)}" placeholder="Nombre y apellido"></div>
-      <div class="field"><label>Cargo del evaluador</label><input type="text" data-field="cargo" value="${esc(state.header.cargo)}" placeholder="Cargo"></div>
+      <div class="field"><label>Empresa evaluada</label><input type="text" data-field="empresa" value="${escAttr(state.header.empresa)}" placeholder="Nombre de la empresa"></div>
+      <div class="field"><label>Nombre del evaluador</label><input type="text" data-field="evaluador" value="${escAttr(state.header.evaluador)}" placeholder="Nombre y apellido"></div>
+      <div class="field"><label>Cargo del evaluador</label><input type="text" data-field="cargo" value="${escAttr(state.header.cargo)}" placeholder="Cargo"></div>
       <div class="field"><label>Fecha</label><input type="date" data-field="fecha" value="${state.header.fecha}"></div>
     </div>
   </div>`;
 }
 function bindFicha(root){
   root.querySelectorAll('[data-field]').forEach(inp=>{
-    inp.oninput = ()=>{ state.header[inp.dataset.field] = inp.value; syncFichaAcrossDom(inp.dataset.field, inp.value); };
+    inp.oninput = ()=>{
+      state.header[inp.dataset.field] = inp.value;
+      syncFieldAcrossDom(`[data-field="${inp.dataset.field}"]`, inp.value, inp);
+      persistCase();
+    };
   });
 }
-function syncFichaAcrossDom(field, value){
-  document.querySelectorAll(`[data-field="${field}"]`).forEach(inp=>{ if(document.activeElement!==inp) inp.value = value; });
+function syncFieldAcrossDom(selector, value, origin){
+  document.querySelectorAll(selector).forEach(inp=>{ if(inp!==origin && document.activeElement!==inp) inp.value = value; });
+}
+
+/* ============== BLOQUE DE CONCLUSIÓN (weak card) ============== */
+function kpiEditRow(entry){
+  return `<div class="kpi-added kpi-added-grid">
+    <div class="kpi-field"><label>Nombre del KPI</label><input type="text" class="kpi-input" value="${escAttr(entry.label)}" data-kpi-label data-id="${entry.id}" placeholder="Ej. Tasa de cierre"></div>
+    <div class="kpi-field"><label>Actual</label><input type="text" class="kpi-input" value="${escAttr(entry.value)}" data-kpi-value data-id="${entry.id}" placeholder="Dato vigente"></div>
+    <div class="kpi-field"><label>Meta</label><input type="text" class="kpi-input" value="${escAttr(entry.meta||'')}" data-kpi-meta data-id="${entry.id}" placeholder="Lo deseable"></div>
+    <div class="kpi-field"><label>Tiempo</label><input type="text" class="kpi-input" value="${escAttr(entry.tiempo||'')}" data-kpi-tiempo data-id="${entry.id}" placeholder="Ej. 6 meses"></div>
+    <button class="link-btn danger kpi-remove-btn" data-kpi-remove data-id="${entry.id}">Quitar KPI</button>
+  </div>`;
+}
+function weakCard(d){
+  const areaKpis = state.kpis.filter(k=>k.areaKey===d.areaKey);
+  const addedSuggestionIdxs = new Set(areaKpis.filter(k=>k.suggestionIdx!==null && k.suggestionIdx!==undefined).map(k=>k.suggestionIdx));
+  const customKpis = areaKpis.filter(k=>k.suggestionIdx===null || k.suggestionIdx===undefined);
+
+  const suggestionsHtml = d.insight.kpis.slice(0,3).map((kpiText,i)=>{
+    if(addedSuggestionIdxs.has(i)){
+      const entry = areaKpis.find(k=>k.suggestionIdx===i);
+      return kpiEditRow(entry);
+    }
+    return `<div class="kpi-suggest">
+      <span class="kpi-suggest-label">${esc(kpiText)}</span>
+      <button class="mini-btn" data-kpi-add data-key="${d.areaKey}" data-section="${d.sectionNum}" data-label="${escAttr(kpiText)}" data-sugidx="${i}">+ Usar</button>
+    </div>`;
+  }).join("");
+
+  const customHtml = customKpis.map(k=>kpiEditRow(k)).join("");
+
+  return `<div class="weak-card">
+    <h4>${esc(d.name)} <span class="score-tag" style="background:${semColor(d.pct)}">${d.pct}%</span> <span class="tipo-badge" style="background:${TIPO_COLORS[d.insight.tipo]}">${esc(d.insight.tipo)}</span></h4>
+    <p class="hallazgo">${hallazgoText(d.name, d.pct, d.individual, d.seed)}</p>
+    <div class="questions-block">
+      <div class="qb-label">Preguntas para profundizar en vivo</div>
+      <ul class="q-list">${d.insight.questions.map(q=>`<li>${esc(q)}</li>`).join("")}</ul>
+    </div>
+    <div class="kpi-block">
+      <div class="qb-label">KPIs sugeridos (hasta 3 por conclusión)</div>
+      ${suggestionsHtml}
+      ${customHtml}
+      <button class="mini-btn ghost" data-kpi-custom-add data-key="${d.areaKey}" data-section="${d.sectionNum}">+ Crear KPI personalizado</button>
+    </div>
+  </div>`;
 }
 
 /* ============== RENDER: SECTION 1 ============== */
@@ -638,27 +1275,30 @@ function renderSection1(){
   state.s1.forEach((cat, ci)=>{
     const pct = catPercentS1(cat);
     const missing = cat.items.filter(v=>v===null).length;
-    html += `<div class="cat-card">
+    html += `<div class="cat-card ${cat.locked?'locked':''}">
       <div class="cat-head">
         <h3>${esc(cat.name)}</h3>
         <div class="cat-meta">
-          ${missing>0?`<span class="unanswered-flag">${missing} sin responder</span>`:""}
-          <span class="pill" style="background:${pct===null?'var(--gris)':semColor(pct)}">${pct===null?"—":pct+"%"}</span>
+          ${(missing>0 && !cat.locked)?`<span class="unanswered-flag">${missing} sin responder</span>`:""}
+          <button class="lock-btn ${cat.locked?'is-locked':''}" data-s1-lock data-ci="${ci}">${cat.locked?'🔒 Bloqueada':'🔓 Bloquear categoría'}</button>
+          <span class="pill" style="background:${cat.locked?'#BEBCB7':(pct===null?'var(--gris)':semColor(pct))}">${cat.locked?"—":(pct===null?"—":pct+"%")}</span>
         </div>
       </div>
       ${cat.items.map((val,ii)=>`
         <div class="item-row">
-          <div class="item-text"><span class="idx">${ii+1}.</span>${esc(SECTION1_DATA[ci].items[ii])}${val===null?'<span class="unanswered-flag">Sin responder</span>':''}</div>
+          <div class="item-text"><span class="idx">${ii+1}.</span>${esc(SECTION1_DATA[ci].items[ii])}${(val===null && !cat.locked)?'<span class="unanswered-flag">Sin responder</span>':''}${val==='na'?'<span class="na-flag">No aplica</span>':''}</div>
           <div class="pos-neg">
-            <button class="pn-btn positivo ${val===true?'selected':''}" data-s1 data-ci="${ci}" data-ii="${ii}" data-val="true">POSITIVO</button>
-            <button class="pn-btn negativo ${val===false?'selected':''}" data-s1 data-ci="${ci}" data-ii="${ii}" data-val="false">NEGATIVO</button>
+            <button class="pn-btn positivo ${val===true?'selected':''}" data-s1 data-ci="${ci}" data-ii="${ii}" data-val="true" ${cat.locked?'disabled':''}>POSITIVO</button>
+            <button class="pn-btn negativo ${val===false?'selected':''}" data-s1 data-ci="${ci}" data-ii="${ii}" data-val="false" ${cat.locked?'disabled':''}>NEGATIVO</button>
+            <button class="pn-btn na ${val==='na'?'selected':''}" data-s1 data-ci="${ci}" data-ii="${ii}" data-val="na" ${cat.locked?'disabled':''}>N/A</button>
           </div>
         </div>
       `).join("")}
+      ${cat.locked?`<div class="locked-banner">Esta categoría está bloqueada: no aplica para este cliente. No impacta el índice general ni aparece en el PDF.</div>`:""}
     </div>`;
   });
 
-  html += renderResultsBlock(state.s1, catPercentS1, "Diagnóstico del departamento comercial");
+  html += renderResultsBlock(withIdx(state.s1).filter(c=>!c.locked), catPercentS1, "el departamento comercial", 1, S1_INSIGHTS, "el equipo");
   html += `<div class="export-bar"><button class="btn-export" id="export-1">⭳ Descargar PDF — Sección 1</button></div>`;
   return html;
 }
@@ -697,31 +1337,39 @@ function renderSection2(){
     </div>`;
   });
 
-  html += renderResultsBlock(state.s2.filter(c=>!c.locked), catPercentS2, "Diagnóstico de la gestión comercial");
+  html += renderResultsBlock(withIdx(state.s2).filter(c=>!c.locked), catPercentS2, "la gestión comercial", 2, S2_INSIGHTS, "el equipo");
   html += `<div class="export-bar"><button class="btn-export" id="export-2">⭳ Descargar PDF — Sección 2</button></div>`;
   return html;
 }
 
-/* ============== RENDER: RESULTS (shared s1/s2) ============== */
-function renderResultsBlock(cats, fn, title){
+/* ============== RENDER: RESULTS (compartido s1/s2) ============== */
+function renderResultsBlock(cats, fn, scopeLabel, sectionNum, insightsArr, entity){
   const idx = overallIndex(cats, fn);
   const anyIncomplete = cats.some(c=>fn(c)===null);
   const weak = weakest(cats, fn, 3).filter(w=>w.pct<70);
 
-  let html = `<div class="results-title"><h2>Resultados</h2></div>`;
+  let html = `<div class="card" style="margin-top:20px;">`;
+  html += `<div class="results-title" style="margin-top:0;"><h2>Resultados</h2></div>`;
   if(anyIncomplete){
-    html += `<div class="warn-banner">⚠ Hay categorías incompletas. El índice general y la detección de áreas débiles se calculan solo cuando todas las categorías estén 100% respondidas.</div>`;
+    html += `<div class="warn-banner">⚠ Hay categorías incompletas. El índice general y las conclusiones se calculan solo con las categorías 100% respondidas.</div>`;
   }
   html += `<div class="index-hero">
     <div>
-      <div class="label">Índice general — ${esc(title)}</div>
+      <div class="label">Índice general — Diagnóstico de ${esc(scopeLabel)}</div>
       <div class="num">${idx===null?"—":idx}${idx!==null?'<small>/100</small>':''}</div>
     </div>
     <div class="semtag" style="background:${idx===null?'#6b6b6d':semColor(idx)};color:#fff;">${semLabel(idx)}</div>
   </div>`;
 
   html += `<div class="bars">`;
-  cats.forEach(c=>{
+  const sortedCats = [...cats].sort((a,b)=>{
+    const pa = fn(a), pb = fn(b);
+    if(pa===null && pb===null) return 0;
+    if(pa===null) return 1;
+    if(pb===null) return -1;
+    return pa - pb;
+  });
+  sortedCats.forEach(c=>{
     const p = fn(c);
     html += `<div class="bar-row">
       <div class="bar-label"><span>${esc(c.name)}</span><b>${p===null?"Incompleto":p+"%"}</b></div>
@@ -730,19 +1378,24 @@ function renderResultsBlock(cats, fn, title){
   });
   html += `</div>`;
 
-  if(weak.length>0){
-    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Áreas de mayor oportunidad</h3>`;
-    weak.forEach((w,i)=>{
-      html += `<div class="weak-card">
-        <h4>${esc(w.cat.name)} <span class="score-tag" style="background:${semColor(w.pct)}">${w.pct}%</span></h4>
-        <p>${recoText(w.cat.name, i)}</p>
-      </div>`;
-    });
-    html += `</div>`;
-  } else if(!anyIncomplete){
-    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Áreas de mayor oportunidad</h3><p style="color:var(--gris);font-size:13.5px;margin-top:8px;">No se identifican categorías por debajo del umbral de atención (70%). El desempeño general es sólido.</p></div>`;
+  const resumen = buildResumen(idx, weak.map(w=>w.cat.name), scopeLabel, entity);
+  if(resumen){
+    html += `<div class="resumen-box"><b>Lectura rápida:</b> ${esc(resumen)}</div>`;
   }
 
+  if(weak.length>0){
+    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Conclusiones para profundizar en vivo</h3>`;
+    weak.forEach(w=>{
+      const insight = insightsArr[w.cat.origIdx];
+      const areaKey = `s${sectionNum}-${w.cat.origIdx}`;
+      html += weakCard({ name:w.cat.name, pct:w.pct, insight, areaKey, sectionNum, seed:w.cat.origIdx, individual:false });
+    });
+    html += `</div>`;
+  } else if(!anyIncomplete && idx!==null){
+    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Conclusiones para profundizar en vivo</h3><p style="color:var(--gris);font-size:13.5px;margin-top:8px;">No se identifican categorías por debajo del umbral de atención (70%). El desempeño general es sólido.</p></div>`;
+  }
+
+  html += `</div>`;
   return html;
 }
 
@@ -761,7 +1414,7 @@ function renderSection3(){
         <input type="checkbox" ${it.enabled?'checked':''} data-s3-toggle data-ii="${ii}">
         <span class="slider-track"></span>
       </label>
-      <input type="text" class="s3-name-input" value="${esc(it.name)}" data-s3-name data-ii="${ii}" ${it.enabled?'':'disabled'}>
+      <input type="text" class="s3-name-input" value="${escAttr(it.name)}" data-s3-name data-ii="${ii}" ${it.enabled?'':'disabled'}>
       <div class="s3-slider-wrap ${it.answered?'':'unanswered'}">
         ${!it.answered?'<span class="s3-hint">Desliza para evaluar</span>':''}
         <input type="range" min="1" max="10" step="1" value="${it.score||5}" data-s3-slider data-ii="${ii}" ${it.enabled?'':'disabled'}>
@@ -777,15 +1430,17 @@ function renderSection3(){
 }
 
 function renderResultsSection3(){
-  const enabled = state.s3.filter(i=>i.enabled);
+  const s3WithIdx = state.s3.map((it,i)=>({ ...it, origIdx:i }));
+  const enabled = s3WithIdx.filter(i=>i.enabled);
   const evaluated = enabled.filter(i=>i.answered);
   const missing = enabled.length - evaluated.length;
   const complete = enabled.length>0 && missing===0;
   const avg = evaluated.length>0 ? Math.round((evaluated.reduce((a,b)=>a+b.score,0)/evaluated.length/10)*100) : null;
 
-  let html = `<div class="results-title"><h2>Resultados</h2></div>`;
+  let html = `<div class="card" style="margin-top:20px;">`;
+  html += `<div class="results-title" style="margin-top:0;"><h2>Resultados</h2></div>`;
   if(!complete){
-    html += `<div class="warn-banner">⚠ ${enabled.length===0?"No hay competencias activas para evaluar.":`Faltan ${missing} competencia(s) activa(s) por evaluar. El índice general que se muestra abajo considera únicamente las competencias ya evaluadas.`}</div>`;
+    html += `<div class="warn-banner">⚠ ${enabled.length===0?"No hay competencias activas para evaluar.":`Faltan ${missing} competencia(s) activa(s) por evaluar. El índice general y las conclusiones consideran únicamente lo ya evaluado.`}</div>`;
   }
   html += `<div class="index-hero">
     <div>
@@ -796,7 +1451,13 @@ function renderResultsSection3(){
   </div>`;
 
   html += `<div class="bars">`;
-  enabled.forEach(it=>{
+  const sortedEnabled = [...enabled].sort((a,b)=>{
+    if(!a.answered && !b.answered) return 0;
+    if(!a.answered) return 1;
+    if(!b.answered) return -1;
+    return a.score - b.score;
+  });
+  sortedEnabled.forEach(it=>{
     const p = it.answered ? Math.round((it.score/10)*100) : null;
     html += `<div class="bar-row ${it.answered?'':'not-answered'}">
       <div class="bar-label"><span>${esc(it.name)}</span><b>${it.answered?it.score+"/10":"Sin evaluar"}</b></div>
@@ -805,23 +1466,239 @@ function renderResultsSection3(){
   });
   html += `</div>`;
 
-  if(evaluated.length>0){
-    const weakItems = evaluated.map(it=>({name:it.name, score:it.score}))
-      .sort((a,b)=>a.score-b.score).slice(0,3).filter(w=>w.score<=7);
-    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Áreas de mayor oportunidad</h3>`;
-    if(weakItems.length===0){
-      html += `<p style="color:var(--gris);font-size:13.5px;margin-top:8px;">No se identifican competencias por debajo del umbral de atención. El desempeño general es sólido.</p>`;
-    } else {
-      weakItems.forEach((w,i)=>{
-        const pct = Math.round((w.score/10)*100);
-        html += `<div class="weak-card">
-          <h4>${esc(w.name)} <span class="score-tag" style="background:${semColor(pct)}">${w.score}/10</span></h4>
-          <p>${recoText(w.name, i)}</p>
-        </div>`;
+  const weakItems = evaluated.map(it=>({name:it.name, score:it.score, origIdx:it.origIdx}))
+    .sort((a,b)=>a.score-b.score).slice(0,3).filter(w=>w.score<=7);
+
+  const resumen = buildResumen(avg, weakItems.map(w=>w.name), "las competencias comerciales evaluadas", "el vendedor");
+  if(resumen){
+    html += `<div class="resumen-box"><b>Lectura rápida:</b> ${esc(resumen)}</div>`;
+  }
+
+  if(weakItems.length>0){
+    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Conclusiones para profundizar en vivo</h3>`;
+    weakItems.forEach(w=>{
+      const pct = Math.round((w.score/10)*100);
+      const insight = S3_INSIGHTS[w.origIdx];
+      const areaKey = `s3-${w.origIdx}`;
+      html += weakCard({ name:w.name, pct, insight, areaKey, sectionNum:3, seed:w.origIdx, individual:true });
+    });
+    html += `</div>`;
+  } else if(evaluated.length>0){
+    html += `<div class="weak-wrap"><h3 style="font-size:16px;font-weight:600;">Conclusiones para profundizar en vivo</h3><p style="color:var(--gris);font-size:13.5px;margin-top:8px;">No se identifican competencias por debajo del umbral de atención entre lo evaluado hasta ahora.</p></div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+/* ============== RENDER: SECTION 4 — PANEL 360° ============== */
+function buildCorrelation(){
+  const results = THEME_GROUPS.map(t=>{
+    const sources = [];
+    if(t.s1!==undefined){
+      const cat = state.s1[t.s1];
+      if(cat.locked){
+        sources.push({ label:`Sección 1 · ${cat.name}`, status:'off', pct:null });
+      } else {
+        const pct = catPercentS1(cat);
+        sources.push({ label:`Sección 1 · ${cat.name}`, status: pct===null?'pending':(pct<70?'weak':'ok'), pct });
+      }
+    }
+    if(t.s2!==undefined){
+      const cat = state.s2[t.s2];
+      if(cat.locked){
+        sources.push({ label:`Sección 2 · ${cat.name}`, status:'off', pct:null });
+      } else {
+        const pct = catPercentS2(cat);
+        sources.push({ label:`Sección 2 · ${cat.name}`, status: pct===null?'pending':(pct<70?'weak':'ok'), pct });
+      }
+    }
+    if(t.s3!==undefined){
+      t.s3.forEach(idx=>{
+        const it = state.s3[idx];
+        if(!it.enabled){
+          sources.push({ label:`Sección 3 · ${it.name}`, status:'off', pct:null });
+        } else if(!it.answered){
+          sources.push({ label:`Sección 3 · ${it.name}`, status:'pending', pct:null });
+        } else {
+          const pct = Math.round((it.score/10)*100);
+          sources.push({ label:`Sección 3 · ${it.name}`, status: pct<70?'weak':'ok', pct });
+        }
       });
     }
+    const weakCount = sources.filter(s=>s.status==='weak').length;
+    return { name:t.name, sources, weakCount };
+  }).filter(t=>t.weakCount>0);
+
+  const confirmed = results.filter(t=>t.weakCount>=2).map(t=>({ ...t,
+    note:"Esta brecha aparece en más de una fuente para este cliente — no parece un caso aislado, sino un patrón. Esto fortalece el argumento de una intervención más profunda, no solo un ajuste puntual." }));
+  const single = results.filter(t=>t.weakCount===1).map(t=>({ ...t,
+    note:"Por ahora esta señal solo aparece en una fuente. Si se aplica otra modalidad con este cliente, se podrá confirmar si es un patrón más amplio o algo puntual." }));
+  return { confirmed, single };
+}
+function chipLabel(s){
+  if(s.status==='weak' || s.status==='ok') return `${s.label} · ${s.pct}%`;
+  if(s.status==='pending') return `${s.label} · pendiente`;
+  return `${s.label} · no aplica`;
+}
+function themeCard(t, confirmed){
+  const chips = t.sources.map(s=>`<span class="theme-chip ${s.status}">${esc(chipLabel(s))}</span>`).join("");
+  return `<div class="weak-card ${confirmed?'theme-confirmed':''}">
+    <h4>${esc(t.name)}</h4>
+    <div class="theme-chips">${chips}</div>
+    <p>${t.note}</p>
+  </div>`;
+}
+/* ============== SÍNTESIS PARA LA PROPUESTA ============== */
+function collectAllWeakAreas(){
+  const items = [];
+  withIdx(state.s1).filter(c=>!c.locked).forEach(c=>{
+    const pct = catPercentS1(c);
+    if(pct!==null && pct<70) items.push({ section:1, name:c.name, pct, tipo:S1_INSIGHTS[c.origIdx].tipo });
+  });
+  withIdx(state.s2).filter(c=>!c.locked).forEach(c=>{
+    const pct = catPercentS2(c);
+    if(pct!==null && pct<70) items.push({ section:2, name:c.name, pct, tipo:S2_INSIGHTS[c.origIdx].tipo });
+  });
+  state.s3.forEach((it,i)=>{
+    if(it.enabled && it.answered){
+      const pct = Math.round((it.score/10)*100);
+      if(pct<70) items.push({ section:3, name:it.name, pct, tipo:S3_INSIGHTS[i].tipo });
+    }
+  });
+  return items.sort((a,b)=>a.pct-b.pct);
+}
+function sectionSnapshot(){
+  const s1cats = withIdx(state.s1).filter(c=>!c.locked);
+  const s2cats = withIdx(state.s2).filter(c=>!c.locked);
+  const s3enabled = state.s3.filter(i=>i.enabled);
+  const s3evaluated = s3enabled.filter(i=>i.answered);
+  const s3Idx = s3evaluated.length>0 ? Math.round((s3evaluated.reduce((a,b)=>a+b.score,0)/s3evaluated.length/10)*100) : null;
+  return [
+    { label:"Departamento comercial", started:s1cats.some(c=>c.items.some(v=>v!==null)), idx:overallIndex(s1cats, catPercentS1) },
+    { label:"Gestión comercial", started:s2cats.some(c=>c.items.some(v=>v!==null)), idx:overallIndex(s2cats, catPercentS2) },
+    { label:"Competencias comerciales", started:s3enabled.some(i=>i.answered), idx:s3Idx }
+  ];
+}
+function snapshotRow(){
+  return `<div class="snapshot-row">` + sectionSnapshot().map(s=>{
+    if(!s.started) return `<div class="snapshot-card empty"><div class="snapshot-label">${esc(s.label)}</div><div class="snapshot-empty-text">Sin iniciar</div></div>`;
+    return `<div class="snapshot-card">
+      <div class="snapshot-label">${esc(s.label)}</div>
+      <div class="snapshot-num" style="color:${s.idx===null?'#6b6b6d':semColor(s.idx)}">${s.idx===null?"—":s.idx+"%"}</div>
+      <div class="snapshot-tag" style="background:${s.idx===null?'#6b6b6d':semColor(s.idx)}">${semLabel(s.idx)}</div>
+    </div>`;
+  }).join("") + `</div>`;
+}
+function tipoDistributionBlock(weakAreas){
+  if(weakAreas.length===0) return "";
+  const counts = {};
+  weakAreas.forEach(w=>{ counts[w.tipo] = (counts[w.tipo]||0)+1; });
+  const dist = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max = dist[0][1];
+  let html = `<div class="results-title" style="margin-top:34px;"><h2>¿Dónde debería enfocarse la propuesta?</h2></div>
+  <p style="color:var(--gris);font-size:13px;margin-top:4px;">Distribución de las brechas encontradas hasta ahora, por tipo de intervención.</p>
+  <div class="tipo-dist">`;
+  dist.forEach(([tipo,count])=>{
+    const pct = Math.round((count/max)*100);
+    html += `<div class="tipo-dist-row">
+      <span class="tipo-dist-label"><span class="tipo-dot" style="background:${TIPO_COLORS[tipo]}"></span>${esc(tipo)}</span>
+      <div class="tipo-dist-track"><div class="tipo-dist-fill" style="width:${pct}%;background:${TIPO_COLORS[tipo]}"></div></div>
+      <span class="tipo-dist-count">${count}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+function buildBrief(weakAreas){
+  const snap = sectionSnapshot().filter(s=>s.started && s.idx!==null);
+  if(weakAreas.length===0 && snap.length===0 && state.kpis.length===0) return null;
+  const empresa = state.header.empresa || "el cliente evaluado";
+  let text = `Diagnóstico comercial — ${empresa}\n\n`;
+  if(snap.length>0){
+    text += `Estado general: ` + snap.map(s=>`${s.label} ${s.idx}%`).join(" · ") + `.\n\n`;
+  }
+  if(weakAreas.length>0){
+    text += `Principales brechas identificadas:\n`;
+    weakAreas.slice(0,6).forEach(w=>{ text += `- ${w.name} (${w.pct}%) — ${w.tipo}\n`; });
+    text += `\n`;
+  }
+  if(state.kpis.length>0){
+    text += `KPIs a monitorear:\n`;
+    state.kpis.forEach(k=>{
+      const parts = [];
+      if(k.value) parts.push(`Actual: ${k.value}`);
+      if(k.meta) parts.push(`Meta: ${k.meta}`);
+      if(k.tiempo) parts.push(`Plazo: ${k.tiempo}`);
+      text += `- ${k.label || "(sin definir)"}${parts.length?` — ${parts.join(" · ")}`:''}\n`;
+    });
+  }
+  return text.trim();
+}
+
+function renderSection4(){
+  const s1Any = state.s1.filter(c=>!c.locked).some(c=>c.items.some(v=>v!==null));
+  const s2Any = state.s2.filter(c=>!c.locked).some(c=>c.items.some(v=>v!==null));
+  const s3Any = state.s3.some(i=>i.enabled && i.answered);
+  const sectionsUsed = [s1Any, s2Any, s3Any].filter(Boolean).length;
+  const weakAreas = collectAllWeakAreas();
+
+  let html = renderFicha();
+  html += `<div class="card" style="margin-top:20px;">
+    <div class="card-title"><span class="sq"></span>Panel 360° — Síntesis para la propuesta</div>
+    <p style="font-size:13.5px;color:#5B5B5D;margin-top:10px;line-height:1.5;">Consolida lo evaluado hasta ahora con este cliente: estado general, dónde enfocar la propuesta, un brief listo para copiar y, si aplicaste más de una modalidad, los patrones que se repiten entre fuentes.</p>
+  </div>`;
+
+  html += `<div class="card" style="margin-top:20px;">`;
+  html += `<div class="results-title" style="margin-top:0;"><h2>Estado general</h2></div>`;
+  html += snapshotRow();
+
+  html += tipoDistributionBlock(weakAreas);
+
+  const brief = buildBrief(weakAreas);
+  if(brief){
+    html += `<div class="results-title" style="margin-top:34px;"><h2>Brief para la propuesta</h2></div>
+    <p style="color:var(--gris);font-size:13px;margin-top:4px;">Texto listo para copiar y pegar en tu propuesta o CRM.</p>
+    <div class="brief-box">
+      <textarea class="brief-textarea" id="brief-textarea" readonly>${esc(brief)}</textarea>
+      <button class="mini-btn" id="btn-copy-brief" type="button">📋 Copiar texto</button>
+    </div>`;
+  }
+
+  html += `<div class="results-title" style="margin-top:34px;"><h2>Cruce de patrones entre modalidades</h2></div>`;
+  if(sectionsUsed < 2){
+    html += `<p style="color:var(--gris);font-size:13px;margin-top:4px;">Esto se activa automáticamente cuando aplicas 2 o más modalidades con este cliente.</p>`;
+  }
+  const { confirmed, single } = buildCorrelation();
+  if(confirmed.length>0){
+    html += `<div class="weak-wrap"><h3 style="font-size:15px;font-weight:600;">🔴 Patrones confirmados en más de una fuente</h3>`;
+    confirmed.forEach(t=> html += themeCard(t, true));
     html += `</div>`;
   }
+  if(single.length>0){
+    html += `<div class="weak-wrap"><h3 style="font-size:15px;font-weight:600;">🟠 Señales individuales</h3>`;
+    single.forEach(t=> html += themeCard(t, false));
+    html += `</div>`;
+  }
+  if(confirmed.length===0 && single.length===0){
+    html += `<p style="color:var(--gris);font-size:13.5px;margin-top:10px;">Aún no hay señales para cruzar.</p>`;
+  }
+
+  html += `<div class="results-title" style="margin-top:34px;"><h2>KPIs a monitorear</h2></div>`;
+  if(state.kpis.length===0){
+    html += `<p style="color:var(--gris);font-size:13.5px;margin-top:8px;">Aún no se ha marcado ningún KPI. Puedes hacerlo desde las conclusiones de cada sección.</p>`;
+  } else {
+    html += `<div class="kpi-summary-list">`;
+    state.kpis.forEach(k=>{
+      html += `<div class="kpi-summary-row">
+        <span class="kpi-summary-tag">Sección ${k.section}</span>
+        ${kpiEditRow(k)}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="export-bar"><button class="btn-export" id="export-4">⭳ Descargar PDF — Panel 360</button></div>`;
   return html;
 }
 
@@ -829,8 +1706,15 @@ function renderResultsSection3(){
 function bindSection1(root){
   root.querySelectorAll('[data-s1]').forEach(b=>{
     b.onclick = ()=>{
-      const ci = +b.dataset.ci, ii = +b.dataset.ii, val = b.dataset.val==="true";
-      state.s1[ci].items[ii] = val;
+      const ci = +b.dataset.ci, ii = +b.dataset.ii, raw = b.dataset.val;
+      state.s1[ci].items[ii] = raw==="na" ? "na" : (raw==="true");
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-s1-lock]').forEach(b=>{
+    b.onclick = ()=>{
+      const ci = +b.dataset.ci;
+      state.s1[ci].locked = !state.s1[ci].locked;
       renderAll();
     };
   });
@@ -856,7 +1740,7 @@ function bindSection3(root){
     cb.onchange = ()=>{ state.s3[+cb.dataset.ii].enabled = cb.checked; renderAll(); };
   });
   root.querySelectorAll('[data-s3-name]').forEach(inp=>{
-    inp.oninput = ()=>{ state.s3[+inp.dataset.ii].name = inp.value; };
+    inp.oninput = ()=>{ state.s3[+inp.dataset.ii].name = inp.value; persistCase(); };
     inp.onblur = ()=> renderAll();
   });
   root.querySelectorAll('[data-s3-slider]').forEach(sl=>{
@@ -869,21 +1753,95 @@ function bindSection3(root){
       sl.parentElement.classList.remove('unanswered');
       const hint = sl.parentElement.querySelector('.s3-hint');
       if(hint) hint.remove();
+      persistCase();
     };
     sl.onchange = ()=> renderAll();
   });
+}
+function bindKpiActions(root){
+  root.querySelectorAll('[data-kpi-add]').forEach(b=>{
+    b.onclick = ()=>{
+      const key = b.dataset.key, section = +b.dataset.section, label = b.dataset.label, sugidx = +b.dataset.sugidx;
+      const id = 'kpi_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      state.kpis.push({ id, section, areaKey:key, label, value:"", meta:"", tiempo:"", suggestionIdx:sugidx });
+      persistCase();
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-kpi-custom-add]').forEach(b=>{
+    b.onclick = ()=>{
+      const key = b.dataset.key, section = +b.dataset.section;
+      const id = 'kpi_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+      state.kpis.push({ id, section, areaKey:key, label:"", value:"", meta:"", tiempo:"", suggestionIdx:null });
+      persistCase();
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-kpi-remove]').forEach(b=>{
+    b.onclick = ()=>{
+      state.kpis = state.kpis.filter(k=>k.id!==b.dataset.id);
+      persistCase();
+      renderAll();
+    };
+  });
+  root.querySelectorAll('[data-kpi-label]').forEach(inp=>{
+    inp.oninput = ()=>{
+      const k = state.kpis.find(x=>x.id===inp.dataset.id);
+      if(k){ k.label = inp.value; syncFieldAcrossDom(`[data-kpi-label][data-id="${inp.dataset.id}"]`, inp.value, inp); persistCase(); }
+    };
+  });
+  root.querySelectorAll('[data-kpi-value]').forEach(inp=>{
+    inp.oninput = ()=>{
+      const k = state.kpis.find(x=>x.id===inp.dataset.id);
+      if(k){ k.value = inp.value; syncFieldAcrossDom(`[data-kpi-value][data-id="${inp.dataset.id}"]`, inp.value, inp); persistCase(); }
+    };
+  });
+  root.querySelectorAll('[data-kpi-meta]').forEach(inp=>{
+    inp.oninput = ()=>{
+      const k = state.kpis.find(x=>x.id===inp.dataset.id);
+      if(k){ k.meta = inp.value; syncFieldAcrossDom(`[data-kpi-meta][data-id="${inp.dataset.id}"]`, inp.value, inp); persistCase(); }
+    };
+  });
+  root.querySelectorAll('[data-kpi-tiempo]').forEach(inp=>{
+    inp.oninput = ()=>{
+      const k = state.kpis.find(x=>x.id===inp.dataset.id);
+      if(k){ k.tiempo = inp.value; syncFieldAcrossDom(`[data-kpi-tiempo][data-id="${inp.dataset.id}"]`, inp.value, inp); persistCase(); }
+    };
+  });
+}
+
+function bindSection4(root){
+  const copyBtn = root.querySelector('#btn-copy-brief');
+  if(!copyBtn) return;
+  copyBtn.onclick = ()=>{
+    const ta = document.getElementById('brief-textarea');
+    ta.select();
+    ta.setSelectionRange(0, 999999);
+    const done = ()=>{ copyBtn.textContent = '✓ Copiado'; setTimeout(()=>{ copyBtn.textContent = '📋 Copiar texto'; }, 1800); };
+    const fallback = ()=>{
+      try{ document.execCommand('copy'); done(); }
+      catch(e){ alert('No se pudo copiar automáticamente. El texto ya está seleccionado — usa Ctrl+C / Cmd+C.'); }
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  };
 }
 
 /* ============== EXPORT PDF ============== */
 async function exportPdf(sectionKey, titleForFile){
   const node = document.getElementById('capture-' + sectionKey);
   node.classList.add('capturing');
+  node.querySelectorAll('input[type=text], input[type=date]').forEach(inp=>{ inp.setAttribute('value', inp.value); });
+  node.querySelectorAll('textarea').forEach(ta=>{ ta.textContent = ta.value; });
   const btn = document.getElementById('export-' + sectionKey.slice(-1));
   const originalLabel = btn ? btn.textContent : null;
   if(btn){ btn.disabled = true; btn.textContent = "Generando PDF…"; }
   await new Promise(r=>setTimeout(r,50));
   try{
-    const canvas = await html2canvas(node, { scale:2, backgroundColor:"#ececec", useCORS:true });
+    const canvas = await html2canvas(node, { scale:2, backgroundColor:"#F7F7F5", useCORS:true });
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p','mm','a4');
     const pageW = 210, pageH = 297;
@@ -904,14 +1862,12 @@ async function exportPdf(sectionKey, titleForFile){
     try{
       pdf.save(filename);
     } catch(saveErr){
-      // Algunos entornos con sandbox (ej. preview de artifacts) bloquean la descarga directa.
-      // Respaldo: abrir el PDF en una pestaña nueva para poder guardarlo manualmente.
       const blobUrl = pdf.output('bloburl');
       window.open(blobUrl, '_blank');
     }
   } catch(err){
     console.error(err);
-    alert("No se pudo generar la descarga automática del PDF en este entorno de vista previa.\\n\\nEsto suele pasar porque el panel de preview bloquea descargas.\\n\\nSolución: descarga este archivo HTML y ábrelo directamente en tu navegador (Chrome/Edge) — ahí la exportación a PDF funciona sin restricciones.");
+    alert("No se pudo generar la descarga automática del PDF en este entorno de vista previa.\n\nEsto suele pasar porque el panel de preview bloquea descargas.\n\nSolución: descarga este archivo HTML y ábrelo directamente en tu navegador (Chrome/Edge) — ahí la exportación a PDF funciona sin restricciones.");
   } finally {
     node.classList.remove('capturing');
     if(btn){ btn.disabled = false; btn.textContent = originalLabel; }
@@ -919,21 +1875,42 @@ async function exportPdf(sectionKey, titleForFile){
 }
 
 /* ============== MASTER RENDER ============== */
+const EXPORT_TITLES = {
+  1:"Diagnóstico del departamento comercial",
+  2:"Diagnóstico de la gestión comercial",
+  3:"Diagnóstico de competencias comerciales",
+  4:"Panel 360 - Conclusiones consolidadas"
+};
+
 function renderAll(){
+  if(appView==='case' && state) persistCase();
   renderNav();
   const wrap = document.getElementById('sections-wrap');
+
+  if(appView==='landing'){
+    wrap.innerHTML = renderLandingView();
+    bindLanding(wrap);
+    return;
+  }
+
   wrap.innerHTML = `
+    <div class="section-block ${state.currentTab===0?'active':''}"><div id="capture-section0">${renderIntake()}</div></div>
     <div class="section-block ${state.currentTab===1?'active':''}"><div id="capture-section1">${renderSection1()}</div></div>
     <div class="section-block ${state.currentTab===2?'active':''}"><div id="capture-section2">${renderSection2()}</div></div>
     <div class="section-block ${state.currentTab===3?'active':''}"><div id="capture-section3">${renderSection3()}</div></div>
+    <div class="section-block ${state.currentTab===4?'active':''}"><div id="capture-section4">${renderSection4()}</div></div>
   `;
   bindFicha(wrap);
+  bindIntake(wrap);
   bindSection1(wrap);
   bindSection2(wrap);
   bindSection3(wrap);
-  const e1 = document.getElementById('export-1'); if(e1) e1.onclick = ()=>exportPdf('section1','Diagnóstico del departamento comercial');
-  const e2 = document.getElementById('export-2'); if(e2) e2.onclick = ()=>exportPdf('section2','Diagnóstico de la gestión comercial');
-  const e3 = document.getElementById('export-3'); if(e3) e3.onclick = ()=>exportPdf('section3','Diagnóstico de competencias comerciales');
+  bindKpiActions(wrap);
+  bindSection4(wrap);
+  ['1','2','3','4'].forEach(n=>{
+    const btn = document.getElementById('export-'+n);
+    if(btn) btn.onclick = ()=>exportPdf('section'+n, EXPORT_TITLES[n]);
+  });
 }
 
 renderAll();
