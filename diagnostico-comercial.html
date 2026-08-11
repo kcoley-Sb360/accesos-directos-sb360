@@ -401,7 +401,7 @@
   }
   .landing-hero{padding:0;}
   .landing-hero h2{font-size:22px;font-weight:800;letter-spacing:-0.01em;}
-  .landing-hero p{color:var(--text-muted);font-size:14px;margin-top:8px;max-width:600px;}
+  .landing-hero p{color:var(--text-muted);font-size:14px;margin-top:8px;max-width:100%;}
 
   .empty-state{
     margin-top:22px;border:1.5px dashed var(--borde);border-radius:var(--radius-md);padding:40px;
@@ -1124,7 +1124,7 @@ function renderLandingView(){
   let html = `<div class="landing-card">
   <div class="landing-hero">
     <h2>Tus diagnósticos guardados</h2>
-    <p>Cada diagnóstico se guarda automáticamente en este navegador específicamente, identificado por empresa. Ábrelo para continuar donde lo dejaste o crea uno nuevo para un cliente distinto.</p>
+    <p>Cada diagnóstico se guarda automáticamente en este navegador específicamente, identificado por empresa. <br>Ábrelo para continuar donde lo dejaste o crea uno nuevo para un cliente distinto.</p>
   </div>`;
 
   if(cases.length===0){
