@@ -635,6 +635,12 @@ function driveId(link){
 }
 
 function thumbnailUrl(link){
+  function thumbnailUrl(item){
+  if(item.miniatura){
+    const resolved = resolveCustomThumb(item.miniatura);
+    if(resolved) return resolved;
+  }
+  const link = item.link;
   const src = detectSource(link);
   if(src === "youtube"){
     const id = youtubeId(link);
@@ -645,6 +651,15 @@ function thumbnailUrl(link){
     return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w480` : "";
   }
   return "";
+}
+
+function resolveCustomThumb(url){
+  if(!url) return "";
+  if(detectSource(url) === "drive"){
+    const id = driveId(url);
+    return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w480` : "";
+  }
+  return url;
 }
 
 function embedUrl(link){
@@ -769,7 +784,7 @@ function render(){
 }
 
 function thumbImgTag(item){
-  const url = thumbnailUrl(item.link);
+  const url = thumbnailUrl(item);
   const fallback = `this.onerror=null;this.src='data:image/svg+xml;utf8,` +
     encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%236b6b6b" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M10 9l5 3-5 3z" fill="%236b6b6b" stroke="none"/></svg>`) + `'`;
   if(url){
@@ -869,15 +884,17 @@ function itemsFromCsvRows(rows){
   const header = rows[0].map(h => h.trim().toLowerCase());
   const nameIdx = findColIdx(header, ["nombre", "name"]);
   const linkIdx = findColIdx(header, ["link", "url", "enlace"]);
+  const thumbIdx = findColIdx(header, ["miniatura", "thumbnail", "imagen", "portada"]);
   const hasHeader = nameIdx !== -1 && linkIdx !== -1;
   const dataRows = hasHeader ? rows.slice(1) : rows;
   const ni = nameIdx !== -1 ? nameIdx : 0;
   const li = linkIdx !== -1 ? linkIdx : 1;
 
-  return dataRows
-    .map(r => ({ nombre: (r[ni] || "").trim(), link: (r[li] || "").trim() }))
-    .filter(i => i.nombre && i.link);
-}
+  return dataRows.map(r => ({
+    nombre: ...,
+    link: ...,
+    miniatura: thumbIdx !== -1 ? (r[thumbIdx] || "").trim() : "",
+}))
 
 async function loadData(isManualRefresh){
   if(isManualRefresh) refreshBtn.classList.add("spinning");
