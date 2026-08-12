@@ -183,6 +183,24 @@ html{
     color:var(--accent);
   }
 
+  .sort-btn{
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:var(--radius-sm);
+    padding:8px 12px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .sort-btn:hover{ background:var(--tag-bg); }
+  .sort-btn svg{ transition:transform .15s ease; }
+  .sort-btn.desc svg{ transform:scaleY(-1); }
+  
   .refresh-btn{
     border:1px solid var(--border);
     background:#fff;
@@ -253,7 +271,22 @@ html{
     object-fit:contain;
     background:var(--tag-bg);
     padding:5px;
+  }.icon-letter{
+    width:32px;height:32px;
+    border-radius:8px;
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--accent-soft);
+    color:var(--accent-dark);
+    font-weight:700;
+    font-size:14px;
+    line-height:1;
+    text-transform:uppercase;
   }
+  .list .icon-letter{ width:24px;height:24px; font-size:12px; border-radius:6px; }
+  
   .item-name{
     font-size:14px;
     font-weight:600;
@@ -332,6 +365,10 @@ html{
       </div>
       <div class="toolbar-right">
         <span class="count-pill" id="countPill"></span>
+          <button class="sort-btn" id="sortBtn" title="Cambiar orden">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h13M3 12h9M3 18h6"/><path d="M17 20V4M17 4l-4 4M17 4l4 4"/></svg>
+          <span id="sortBtnLabel">A-Z</span>
+          </button>
         <div class="view-toggle">
           <button id="btnCards" class="active" title="Vista de tarjetas">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -364,8 +401,13 @@ html{
 /* =========================================================================
    CONFIGURACIÓN
    -------------------------------------------------------------------------
-   1) Crea un Google Sheet con dos columnas y encabezados exactos:
-        Nombre | Link
+   1) Crea un Google Sheet con columnas y encabezados exactos:
+        Nombre | Link | Icono
+      La columna "Icono" es opcional para cada fila:
+        - Si pegas ahí el link de una imagen (http... .png/.jpg/.svg/etc.),
+          esa imagen se usa como ícono de la tarjeta.
+        - Si la dejas vacía, se muestra automáticamente la letra inicial
+          del nombre como ícono.
    2) Archivo > Compartir > Publicar en la Web > elige la hoja > formato CSV
       > Publicar. Copia la URL que te da Google (algo como:
       https://docs.google.com/spreadsheets/d/e/XXXXX/pub?gid=0&single=true&output=csv)
@@ -384,17 +426,18 @@ const CONFIG = {
 
 // Placeholders iniciales (se usan si SHEET_CSV_URL está vacío o falla la carga)
 const PLACEHOLDER_DATA = [
-  { nombre: "Acceso 1", link: "https://example.com" },
-  { nombre: "Acceso 2", link: "https://example.com" },
-  { nombre: "Acceso 3", link: "https://example.com" },
-  { nombre: "Acceso 4", link: "https://example.com" },
-  { nombre: "Acceso 5", link: "https://example.com" },
-  { nombre: "Acceso 6", link: "https://example.com" },
+  { nombre: "Acceso 1", link: "https://example.com", icono: "" },
+  { nombre: "Acceso 2", link: "https://example.com", icono: "" },
+  { nombre: "Acceso 3", link: "https://example.com", icono: "" },
+  { nombre: "Acceso 4", link: "https://example.com", icono: "" },
+  { nombre: "Acceso 5", link: "https://example.com", icono: "" },
+  { nombre: "Acceso 6", link: "https://example.com", icono: "" },
 ];
 
 /* ========================================================================= */
   
 let currentView = "cards"; // "cards" | "list"
+let sortDir = "asc"; // "asc" (A-Z) | "desc" (Z-A)
 let allItems = [];
 
 const contentEl = document.getElementById("content");
@@ -405,6 +448,8 @@ const searchInput = document.getElementById("searchInput");
 const refreshBtn = document.getElementById("refreshBtn");
 const countPill = document.getElementById("countPill");
 const openSheetBtn = document.getElementById("openSheetBtn");
+const sortBtn = document.getElementById("sortBtn");
+const sortBtnLabel = document.getElementById("sortBtnLabel");
 
 if(CONFIG.SHEET_EDIT_URL){
   openSheetBtn.href = CONFIG.SHEET_EDIT_URL;
@@ -415,6 +460,14 @@ document.getElementById("btnCards").addEventListener("click", () => setView("car
 document.getElementById("btnList").addEventListener("click", () => setView("list"));
 searchInput.addEventListener("input", render);
 refreshBtn.addEventListener("click", () => loadData(true));
+sortBtn.addEventListener("click", toggleSort);
+
+function toggleSort(){
+  sortDir = sortDir === "asc" ? "desc" : "asc";
+  sortBtn.classList.toggle("desc", sortDir === "desc");
+  sortBtnLabel.textContent = sortDir === "asc" ? "A-Z" : "Z-A";
+  render();
+}
 
 function setView(view){
   currentView = view;
@@ -431,17 +484,18 @@ function extIconSvg(){
   </svg>`;
 }
 
-function faviconUrl(link){
-  try{
-    const domain = new URL(link).hostname;
-    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-  }catch(e){
-    return "";
-  }
+function isImageUrl(str){
+  return !!str && /^https?:\/\//i.test(str.trim());
+}
+
+function initialLetter(nombre){
+  const trimmed = (nombre || "").trim();
+  return trimmed ? trimmed.charAt(0) : "?";
 }
 
 function normalize(str){
-  return (str || "").toLocaleLowerCase("es").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const factor = sortDir === "desc" ? -1 : 1;
+  return [...items].sort((a, b) => factor * normalize(a.nombre).localeCompare(normalize(b.nombre), "es"));
 }
 
 function sortItems(items){
@@ -473,17 +527,19 @@ function render(){
   }
 }
 
-function faviconImgTag(item){
-  const url = faviconUrl(item.link);
-  const fallback = `this.onerror=null;this.src='data:image/svg+xml;utf8,` +
-    encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%236b6b6b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`) + `'`;
-  return `<img class="favicon" src="${url}" alt="" onerror="${fallback}">`;
+function iconTag(item){
+  if(isImageUrl(item.icono)){
+    const fallbackLetter = escapeHtml(initialLetter(item.nombre));
+    const onerror = `this.replaceWith(Object.assign(document.createElement('div'),{className:this.className.replace('favicon','icon-letter'),textContent:'${fallbackLetter}'}))`;
+    return `<img class="favicon" src="${escapeHtml(item.icono)}" alt="" onerror="${onerror}">`;
+  }
+  return `<div class="icon-letter">${escapeHtml(initialLetter(item.nombre))}</div>`;
 }
 
 function cardHtml(item){
   return `
     <a class="card" href="${item.link}" target="_blank" rel="noopener noreferrer">
-      ${faviconImgTag(item)}
+      ${iconTag(item)}
       <span class="item-name">${escapeHtml(item.nombre)}</span>
       ${extIconSvg()}
     </a>`;
@@ -492,7 +548,7 @@ function cardHtml(item){
 function rowHtml(item){
   return `
     <a class="row" href="${item.link}" target="_blank" rel="noopener noreferrer">
-      ${faviconImgTag(item)}
+      ${iconTag(item)}
       <span class="item-name">${escapeHtml(item.nombre)}</span>
       ${extIconSvg()}
     </a>`;
@@ -535,14 +591,20 @@ function itemsFromCsvRows(rows){
   const header = rows[0].map(h => h.trim().toLowerCase());
   const nameIdx = header.findIndex(h => h.includes("nombre") || h.includes("name"));
   const linkIdx = header.findIndex(h => h.includes("link") || h.includes("url") || h.includes("enlace"));
-  const dataRows = (nameIdx !== -1 && linkIdx !== -1) ? rows.slice(1) : rows;
+  const iconIdx = header.findIndex(h => h.includes("icono") || h.includes("icon"));
+  const hasHeader = nameIdx !== -1 && linkIdx !== -1;
+  const dataRows = hasHeader ? rows.slice(1) : rows;
   const ni = nameIdx !== -1 ? nameIdx : 0;
   const li = linkIdx !== -1 ? linkIdx : 1;
 
+  const ii = iconIdx; // -1 si la columna "Icono" no existe todavía en el Sheet
+
   return dataRows
-    .map(r => ({ nombre: (r[ni] || "").trim(), link: (r[li] || "").trim() }))
-    .filter(i => i.nombre && i.link);
-}
+    .map(r => ({
+      nombre: (r[ni] || "").trim(),
+      link: (r[li] || "").trim(),
+      icono: ii !== -1 ? (r[ii] || "").trim() : ""
+    }))
 
 async function loadData(isManualRefresh){
   if(isManualRefresh) refreshBtn.classList.add("spinning");
