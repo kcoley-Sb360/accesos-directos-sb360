@@ -354,6 +354,10 @@
   }
   .btn-export:hover{opacity:0.92;}
   .btn-export:disabled{background:var(--gris);cursor:not-allowed;}
+  .btn-export.secondary{
+    background:#fff;color:var(--grafito);border:1.5px solid var(--borde);
+  }
+  .btn-export.secondary:hover{opacity:1;border-color:var(--naranja);color:var(--naranja);}
 
   .legend{display:flex;gap:16px;margin-top:14px;margin-left:24px;flex-wrap:wrap;}
   .legend span{font-size:12px;color:var(--gris);display:flex;align-items:center;gap:8px;}
@@ -391,9 +395,10 @@
   .tab-btn.nav-back{background:var(--fondo);}
 
   /* ---------- Landing: "Mis diagnósticos" (guardado en el navegador) ---------- */
-  /* El botón "+ Nuevo diagnóstico" vive en el hero y solo se muestra en esta vista */
-  #btn-new-case{display:none;}
-  body.view-landing #btn-new-case{display:flex;}
+  /* Los botones de acción viven en el hero y solo se muestran en esta vista */
+  .hero-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .landing-only-action{display:none;}
+  body.view-landing .landing-only-action{display:flex;}
 
   .landing-card{
     background:var(--surface);border:1px solid var(--borde);border-radius:var(--radius-lg);
@@ -415,6 +420,7 @@
   }
   .case-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
   .case-card-top h3{font-size:16px;font-weight:700;line-height:1.3;}
+  .case-card-actions{display:flex;gap:2px;flex:none;}
   .icon-btn{background:none;border:none;cursor:pointer;font-size:15px;opacity:.55;padding:2px;color:var(--grafito);}
   .icon-btn:hover{opacity:1;}
   .icon-btn.danger:hover{color:var(--rojo);}
@@ -440,6 +446,7 @@
   }
   .modal-btn.confirm{background:var(--rojo);border-color:var(--rojo);color:#fff;}
   .modal-btn.cancel:hover{border-color:var(--gris);}
+  .modal-btn.ok{background:var(--naranja);border-color:var(--naranja);color:#fff;}
 
   /* ---------- Toggle POSITIVO / NEGATIVO / N/A ---------- */
   .pn-btn.na.selected{background:var(--gris);border-color:var(--gris);color:#fff;}
@@ -570,7 +577,11 @@
         <h1>Diagnóstico <span>Comercial</span></h1>
         <p class="sub">Evaluación en tiempo real para identificar oportunidades de mejora de la fuerza de venta.</p>
       </div>
-      <button class="btn-export" id="btn-new-case">+ Nuevo diagnóstico</button>
+      <div class="hero-actions">
+        <button class="btn-export secondary landing-only-action" id="btn-load-case">⭱ Cargar diagnósticos</button>
+        <input type="file" id="input-load-case" accept="application/json,.json" multiple style="display:none;">
+        <button class="btn-export landing-only-action" id="btn-new-case">+ Nuevo diagnóstico</button>
+      </div>
     </div>
   </div>
 
@@ -1017,6 +1028,69 @@ function persistCase(){
   all[state.id] = state;
   try{ localStorage.setItem(CASES_KEY, JSON.stringify(all)); }catch(e){ console.error('No se pudo guardar', e); }
 }
+function normalizeCase(c){
+  if(!c.kpis) c.kpis = [];
+  c.kpis.forEach(k=>{ if(k.meta===undefined) k.meta=""; if(k.tiempo===undefined) k.tiempo=""; });
+  if(!c.intake) c.intake = { answers:[null,null,null,null,null] };
+  return c;
+}
+function downloadCaseJSON(id){
+  const all = loadCases();
+  const c = all[id];
+  if(!c) return;
+  const blob = new Blob([JSON.stringify(c, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeName = (c.header.empresa || 'diagnostico').trim().replace(/[^a-z0-9_\-]+/gi, '_').replace(/^_+|_+$/g, '') || 'diagnostico';
+  a.href = url;
+  a.download = `diagnostico_${safeName}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 1000);
+}
+function importCasesFromFiles(fileList){
+  const files = Array.from(fileList || []);
+  if(files.length===0) return;
+  const readOne = (file) => new Promise((resolve)=>{
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!parsed || typeof parsed!=='object' || !parsed.header || !Array.isArray(parsed.s1) || !Array.isArray(parsed.s2) || !Array.isArray(parsed.s3)){
+          resolve({ ok:false, name:file.name });
+          return;
+        }
+        parsed.id = 'case_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+        normalizeCase(parsed);
+        resolve({ ok:true, name:file.name, empresa: parsed.header.empresa || 'Sin nombre de empresa', data:parsed });
+      }catch(e){
+        resolve({ ok:false, name:file.name });
+      }
+    };
+    reader.onerror = () => resolve({ ok:false, name:file.name });
+    reader.readAsText(file);
+  });
+
+  Promise.all(files.map(readOne)).then(results=>{
+    const ok = results.filter(r=>r.ok);
+    const failed = results.filter(r=>!r.ok);
+    if(ok.length>0){
+      const all = loadCases();
+      ok.forEach(r=>{ all[r.data.id] = r.data; });
+      try{ localStorage.setItem(CASES_KEY, JSON.stringify(all)); }catch(e){}
+    }
+    let msg = '';
+    if(ok.length>0){
+      msg += `Se ${ok.length===1?'cargó':'cargaron'} ${ok.length} diagnóstico${ok.length===1?'':'s'}: ${ok.map(r=>esc(r.empresa)).join(', ')}.`;
+    }
+    if(failed.length>0){
+      msg += (msg?'<br><br>':'') + `${failed.length} archivo${failed.length===1?'':'s'} no ${failed.length===1?'pudo':'pudieron'} cargarse por no tener el formato esperado: ${failed.map(r=>esc(r.name)).join(', ')}.`;
+    }
+    showMessageModal(msg || 'No se pudo leer ningún archivo.');
+    renderAll();
+  });
+}
 function newState(){
   return {
     id: 'case_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
@@ -1091,6 +1165,19 @@ function showConfirmModal(message, onConfirm){
   overlay.querySelector('#modal-confirm').onclick = ()=>{ overlay.remove(); onConfirm(); };
   overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
 }
+function showMessageModal(message){
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal-box">
+    <p>${message}</p>
+    <div class="modal-actions">
+      <button class="modal-btn ok" id="modal-ok">Aceptar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#modal-ok').onclick = ()=> overlay.remove();
+  overlay.onclick = (e)=>{ if(e.target===overlay) overlay.remove(); };
+}
 
 /* ============== RENDER: NAV ============== */
 function renderNav(){
@@ -1141,7 +1228,10 @@ function renderLandingView(){
       html += `<div class="case-card">
         <div class="case-card-top">
           <h3>${esc(c.header.empresa) || "Sin nombre de empresa"}</h3>
-          <button class="icon-btn danger" data-delete-case data-id="${c.id}" title="Eliminar">🗑</button>
+          <div class="case-card-actions">
+            <button class="icon-btn" data-download-case data-id="${c.id}" title="Descargar diagnóstico">⭳</button>
+            <button class="icon-btn danger" data-delete-case data-id="${c.id}" title="Eliminar">🗑</button>
+          </div>
         </div>
         <div class="case-meta">${esc(c.header.evaluador)||"Sin evaluador"} · ${c.header.fecha||""}</div>
         <div class="case-progress">
@@ -1163,16 +1253,25 @@ function bindLanding(root){
     appView = 'case';
     renderAll();
   };
+  const loadBtn = document.getElementById('btn-load-case');
+  const loadInput = document.getElementById('input-load-case');
+  if(loadBtn && loadInput){
+    loadBtn.onclick = ()=> loadInput.click();
+    loadInput.onchange = ()=>{
+      importCasesFromFiles(loadInput.files);
+      loadInput.value = '';
+    };
+  }
   root.querySelectorAll('[data-open-case]').forEach(b=>{
     b.onclick = ()=>{
       const all = loadCases();
-      state = all[b.dataset.id];
-      if(!state.kpis) state.kpis = [];
-      state.kpis.forEach(k=>{ if(k.meta===undefined) k.meta=""; if(k.tiempo===undefined) k.tiempo=""; });
-      if(!state.intake) state.intake = { answers:[null,null,null,null,null] };
+      state = normalizeCase(all[b.dataset.id]);
       appView = 'case';
       renderAll();
     };
+  });
+  root.querySelectorAll('[data-download-case]').forEach(b=>{
+    b.onclick = ()=> downloadCaseJSON(b.dataset.id);
   });
   root.querySelectorAll('[data-delete-case]').forEach(b=>{
     b.onclick = ()=>{
