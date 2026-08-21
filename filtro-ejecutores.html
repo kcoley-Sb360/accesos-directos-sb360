@@ -107,27 +107,45 @@
     display:flex;
     gap:22px;
     align-items:flex-start;
+    margin-top:18px;
   }
   .filters{
-    width:280px;
-    flex-shrink:0;
-    background:var(--card);
-    border-radius:var(--radius-lg);
-    box-shadow:var(--shadow);
-    padding:20px;
+    width:250px;
+    flex:none;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius-md);
+    padding:18px 18px 20px;
     position:sticky;
-    top:22px;
-    max-height:calc(100vh - 44px);
+    top:20px;
+    max-height:calc(100vh - 40px);
     overflow-y:auto;
   }
-  .filters h2{
+  .filters-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  .filters-header h2{
     font-size:13px;
-    margin:0 0 14px;
+    margin:0;
     color:var(--ink);
     text-transform:uppercase;
     letter-spacing:.6px;
     font-weight:800;
   }
+  .clear-link{
+    background:transparent;
+    border:none;
+    color:var(--orange);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:inherit;
+    padding:0;
+  }
+  .clear-link:hover{text-decoration:underline;}
   .filter-group{
     margin-bottom:14px;
     border-bottom:1px solid var(--border);
@@ -171,58 +189,61 @@
     cursor:pointer;
   }
   .filter-options input{accent-color:var(--orange);}
-  .clear-btn{
-    width:100%;
-    margin-top:6px;
-    background:transparent;
-    border:1px solid var(--border);
-    color:var(--grey);
-    padding:9px;
-    border-radius:var(--radius-sm);
-    font-size:12.5px;
-    cursor:pointer;
-    font-family:inherit;
-  }
-  .clear-btn:hover{color:var(--orange);border-color:var(--orange);}
   .main{flex:1;min-width:0;}
-  .toolbar{
+
+  /* ---- Tarjeta de herramientas (buscar / orden / vista / actualizar) ---- */
+  .toolbar-card{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    padding:18px 24px;
+    margin-bottom:22px;
+  }
+  .toolbar-row{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:16px;
     flex-wrap:wrap;
     gap:12px;
   }
-  .toolbar input[type=text]{
-    background:var(--card);
+  .toolbar-row input[type=text]{
+    background:#FAFAF9;
     border:1px solid var(--border);
     color:var(--ink);
     padding:11px 14px;
     border-radius:var(--radius-sm);
     font-size:14px;
-    width:260px;
+    width:280px;
     font-family:inherit;
   }
-  .toolbar input[type=text]::placeholder{color:var(--grey-light);}
-  .results-count{color:var(--grey);font-size:13.5px;font-weight:500;}
+  .toolbar-row input[type=text]::placeholder{color:var(--grey-light);}
+  .results-count{color:var(--grey);font-size:13.5px;font-weight:500;white-space:nowrap;}
   .toolbar-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .view-toggle{
-    display:flex;background:var(--card);border:1px solid var(--border);
+  .sort-toggle, .view-toggle{
+    display:flex;background:#FAFAF9;border:1px solid var(--border);
     border-radius:var(--radius-sm);overflow:hidden;
   }
-  .view-toggle button{
+  .sort-toggle button, .view-toggle button{
     border:none;background:transparent;color:var(--grey);
-    padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;
-    font-family:inherit;display:flex;align-items:center;gap:6px;
+    padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;
+    font-family:inherit;
   }
-  .view-toggle button.active{background:var(--orange);color:#fff;}
-  .view-toggle button:not(.active):hover{color:var(--orange);}
-  .sort-btn{
+  .sort-toggle button.active, .view-toggle button.active{background:var(--orange-soft);color:var(--orange);}
+  .sort-toggle button:not(.active):hover, .view-toggle button:not(.active):hover{color:var(--orange);}
+  .refresh-btn{
     background:var(--card);border:1px solid var(--border);color:var(--ink);
-    padding:9px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;
-    cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;
+    padding:9px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;
+    cursor:pointer;font-family:inherit;
   }
-  .sort-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .refresh-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .status-line{
+    display:flex;align-items:center;gap:7px;
+    margin-top:12px;font-size:12.5px;color:var(--grey);
+  }
+  .status-line .dot{
+    width:7px;height:7px;border-radius:50%;background:#2FA84F;flex-shrink:0;
+  }
+  .status-line.error .dot{background:#C0392B;}
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
@@ -230,8 +251,8 @@
   }
   .card{
     background:var(--card);
+    border:1px solid var(--border);
     border-radius:var(--radius-md);
-    box-shadow:var(--shadow);
     padding:18px;
     display:flex;
     flex-direction:column;
@@ -294,7 +315,7 @@
   #grid.list-view .card-actions button{flex:none;padding:7px 12px;}
   .empty{
     text-align:center;color:var(--grey);padding:60px 20px;
-    background:var(--card);border-radius:var(--radius-md);box-shadow:var(--shadow);
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);
   }
   /* Modal */
   .overlay{
@@ -339,6 +360,8 @@
   @media (max-width:860px){
     .layout{flex-direction:column;}
     .filters{width:100%;position:static;max-height:none;}
+    .toolbar-row input[type=text]{width:100%;}
+    .toolbar-controls{width:100%;justify-content:space-between;}
   }
 </style>
 </head>
@@ -358,27 +381,37 @@
     </div>
   </div>
 
-  <div class="layout">
-    <aside class="filters" id="filters">
-      <h2>Filtros</h2>
-      <div id="filterGroups"></div>
-      <button class="clear-btn" id="btnClear">Limpiar filtros</button>
-    </aside>
-
-    <main class="main">
-      <div class="toolbar">
-        <input type="text" id="search" placeholder="Buscar ejecutor por nombre...">
-        <div class="toolbar-controls">
-          <button class="sort-btn" id="btnSort">Ordenar A-Z</button>
-          <div class="view-toggle">
-            <button id="btnViewCards" class="active">▦ Tarjetas</button>
-            <button id="btnViewList">☰ Lista</button>
-          </div>
-          <div class="results-count" id="resultsCount"></div>
+  <div class="toolbar-card">
+    <div class="toolbar-row">
+      <input type="text" id="search" placeholder="Buscar ejecutor por nombre...">
+      <div class="toolbar-controls">
+        <div class="results-count" id="resultsCount"></div>
+        <div class="sort-toggle">
+          <button id="btnSortAsc" class="active">A→Z</button>
+          <button id="btnSortDesc">Z→A</button>
         </div>
+        <div class="view-toggle">
+          <button id="btnViewCards" class="active" title="Vista tarjetas">▦</button>
+          <button id="btnViewList" title="Vista lista">☰</button>
+        </div>
+        <button class="refresh-btn" id="btnRefresh">↻ Actualizar</button>
       </div>
-      <div id="grid" class="grid"></div>
-    </main>
+    </div>
+    <div class="status-line" id="statusLine"></div>
+
+    <div class="layout">
+      <aside class="filters" id="filters">
+        <div class="filters-header">
+          <h2>Filtrar por</h2>
+          <button class="clear-link" id="btnClear">Limpiar</button>
+        </div>
+        <div id="filterGroups"></div>
+      </aside>
+
+      <main class="main">
+        <div id="grid" class="grid"></div>
+      </main>
+    </div>
   </div>
 </div>
 
@@ -503,15 +536,20 @@ async function apiPost(payload){
 
 async function loadData(){
   document.getElementById('grid').innerHTML = '<div class="loading">Cargando ejecutores...</div>';
+  const statusLine = document.getElementById('statusLine');
   try{
     const data = await apiGet();
     STATE.ejecutores = data.ejecutores || data.mentores || [];
     STATE.categorias = data.categorias || {};
     renderFilters();
     renderGrid();
+    statusLine.classList.remove('error');
+    statusLine.innerHTML = `<span class="dot"></span>${STATE.ejecutores.length} ejecutor(es) cargado(s) desde Google Sheets.`;
   }catch(err){
     document.getElementById('grid').innerHTML =
       '<div class="empty">No se pudo conectar con el backend.<br>Revisá que CONFIG.API_URL esté bien configurada en index.html.</div>';
+    statusLine.classList.add('error');
+    statusLine.innerHTML = `<span class="dot"></span>No se pudo cargar la información desde Google Sheets.`;
   }
 }
 
@@ -744,9 +782,16 @@ document.getElementById('search').addEventListener('input', e=>{
   STATE.searchTerm = e.target.value;
   renderGrid();
 });
-document.getElementById('btnSort').addEventListener('click', ()=>{
-  STATE.sortAsc = !STATE.sortAsc;
-  document.getElementById('btnSort').textContent = STATE.sortAsc ? 'Ordenar A-Z' : 'Ordenar Z-A';
+document.getElementById('btnSortAsc').addEventListener('click', ()=>{
+  STATE.sortAsc = true;
+  document.getElementById('btnSortAsc').classList.add('active');
+  document.getElementById('btnSortDesc').classList.remove('active');
+  renderGrid();
+});
+document.getElementById('btnSortDesc').addEventListener('click', ()=>{
+  STATE.sortAsc = false;
+  document.getElementById('btnSortDesc').classList.add('active');
+  document.getElementById('btnSortAsc').classList.remove('active');
   renderGrid();
 });
 document.getElementById('btnViewCards').addEventListener('click', ()=>{
@@ -760,6 +805,9 @@ document.getElementById('btnViewList').addEventListener('click', ()=>{
   document.getElementById('btnViewList').classList.add('active');
   document.getElementById('btnViewCards').classList.remove('active');
   renderGrid();
+});
+document.getElementById('btnRefresh').addEventListener('click', ()=>{
+  loadData();
 });
 
 loadData();
