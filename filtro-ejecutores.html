@@ -205,6 +205,24 @@
   }
   .toolbar input[type=text]::placeholder{color:var(--grey-light);}
   .results-count{color:var(--grey);font-size:13.5px;font-weight:500;}
+  .toolbar-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .view-toggle{
+    display:flex;background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius-sm);overflow:hidden;
+  }
+  .view-toggle button{
+    border:none;background:transparent;color:var(--grey);
+    padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:inherit;display:flex;align-items:center;gap:6px;
+  }
+  .view-toggle button.active{background:var(--orange);color:#fff;}
+  .view-toggle button:not(.active):hover{color:var(--orange);}
+  .sort-btn{
+    background:var(--card);border:1px solid var(--border);color:var(--ink);
+    padding:9px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;
+    cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;
+  }
+  .sort-btn:hover{border-color:var(--orange);color:var(--orange);}
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
@@ -238,14 +256,9 @@
     padding:3px 10px;border-radius:20px;
   }
   .contact-link:hover{background:var(--orange);color:#fff;}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
-  .tag{
-    background:#F4F4F3;
-    color:var(--grey);
-    font-size:11px;
-    padding:3px 9px;
-    border-radius:20px;
-    font-weight:500;
+  .contact-link.disabled{
+    color:var(--grey-light);background:#F4F4F3;
+    cursor:default;pointer-events:none;
   }
   .card-actions{
     display:flex;gap:8px;margin-top:10px;
@@ -258,6 +271,27 @@
     font-family:inherit;font-weight:600;
   }
   .card-actions button:hover{color:var(--orange);border-color:var(--orange);}
+
+  /* ---- Vista de lista ---- */
+  #grid.list-view{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  #grid.list-view .card{
+    flex-direction:row;
+    align-items:center;
+    flex-wrap:wrap;
+    padding:12px 18px;
+    gap:16px;
+  }
+  #grid.list-view .card-top{flex:1 1 220px;min-width:200px;}
+  #grid.list-view .meta-line{flex:0 0 auto;}
+  #grid.list-view .contact-row{flex:0 0 auto;}
+  #grid.list-view .card-actions{
+    margin-top:0;padding-top:0;border-top:none;
+    flex:0 0 auto;width:auto;
+  }
+  #grid.list-view .card-actions button{flex:none;padding:7px 12px;}
   .empty{
     text-align:center;color:var(--grey);padding:60px 20px;
     background:var(--card);border-radius:var(--radius-md);box-shadow:var(--shadow);
@@ -334,7 +368,14 @@
     <main class="main">
       <div class="toolbar">
         <input type="text" id="search" placeholder="Buscar ejecutor por nombre...">
-        <div class="results-count" id="resultsCount"></div>
+        <div class="toolbar-controls">
+          <button class="sort-btn" id="btnSort">Ordenar A-Z</button>
+          <div class="view-toggle">
+            <button id="btnViewCards" class="active">▦ Tarjetas</button>
+            <button id="btnViewList">☰ Lista</button>
+          </div>
+          <div class="results-count" id="resultsCount"></div>
+        </div>
       </div>
       <div id="grid" class="grid"></div>
     </main>
@@ -435,7 +476,9 @@ let STATE = {
   categorias: {},
   activeFilters: { Rol:[], Expertis:[], Industria:[], PerfilObjetivo:[], DimensionEmpresa:[], Nacionalidad:[], PaisResidencia:[], Idiomas:[] },
   searchTerm: '',
-  editingId: null
+  editingId: null,
+  viewMode: 'cards',
+  sortAsc: true
 };
 
 function toast(msg){
@@ -524,18 +567,35 @@ function matchesFilters(m){
   return true;
 }
 
+function contactButton(label, href){
+  return href
+    ? `<a href="${href}" target="_blank" rel="noopener" class="contact-link">${label}</a>`
+    : `<span class="contact-link disabled">${label}</span>`;
+}
+
 function renderGrid(){
   const grid = document.getElementById('grid');
-  const filtered = STATE.ejecutores.filter(matchesFilters);
+  let filtered = STATE.ejecutores.filter(matchesFilters);
+
+  filtered = filtered.slice().sort((a, b)=>{
+    const cmp = (a.Nombre||'').localeCompare(b.Nombre||'', 'es', {sensitivity:'base'});
+    return STATE.sortAsc ? cmp : -cmp;
+  });
+
   document.getElementById('resultsCount').textContent =
     `${filtered.length} de ${STATE.ejecutores.length} ejecutores`;
+
+  grid.className = STATE.viewMode === 'list' ? 'grid list-view' : 'grid';
 
   if(filtered.length === 0){
     grid.innerHTML = '<div class="empty">No hay ejecutores que coincidan con esos filtros.</div>';
     return;
   }
 
-  grid.innerHTML = filtered.map(m=>`
+  grid.innerHTML = filtered.map(m=>{
+    const whatsappHref = m.WhatsApp ? `https://wa.me/${(m.WhatsApp||'').replace(/[^\d]/g,'')}` : '';
+    const emailHref = m.Email ? `mailto:${m.Email}` : '';
+    return `
     <div class="card">
       <div class="card-top">
         <div class="avatar">${m.Foto ? `<img src="${m.Foto}">` : (m.Nombre||'?').charAt(0)}</div>
@@ -545,17 +605,18 @@ function renderGrid(){
         </div>
       </div>
       ${(m.PaisResidencia || m.Nacionalidad) ? `<div class="meta-line">${[m.PaisResidencia, m.Nacionalidad].filter(Boolean).join(' · ')}</div>` : ''}
-      ${(m.Expertis&&m.Expertis.length) ? `<div class="tags">${m.Expertis.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
-      ${(m.LinkedIn || m.WhatsApp) ? `<div class="contact-row">
-        ${m.LinkedIn ? `<a href="${m.LinkedIn}" target="_blank" rel="noopener" class="contact-link">LinkedIn</a>` : ''}
-        ${m.WhatsApp ? `<a href="https://wa.me/${(m.WhatsApp||'').replace(/[^\d]/g,'')}" target="_blank" rel="noopener" class="contact-link">WhatsApp</a>` : ''}
-      </div>` : ''}
+      <div class="contact-row">
+        ${contactButton('LinkedIn', m.LinkedIn)}
+        ${contactButton('WhatsApp', whatsappHref)}
+        ${contactButton('Email', emailHref)}
+      </div>
       <div class="card-actions">
         <button onclick="openEdit('${m.ID}')">Editar</button>
         <button onclick="removeMentor('${m.ID}')">Eliminar</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /* ===== Modal / CRUD ===== */
@@ -681,6 +742,23 @@ document.getElementById('btnClear').addEventListener('click', ()=>{
 });
 document.getElementById('search').addEventListener('input', e=>{
   STATE.searchTerm = e.target.value;
+  renderGrid();
+});
+document.getElementById('btnSort').addEventListener('click', ()=>{
+  STATE.sortAsc = !STATE.sortAsc;
+  document.getElementById('btnSort').textContent = STATE.sortAsc ? 'Ordenar A-Z' : 'Ordenar Z-A';
+  renderGrid();
+});
+document.getElementById('btnViewCards').addEventListener('click', ()=>{
+  STATE.viewMode = 'cards';
+  document.getElementById('btnViewCards').classList.add('active');
+  document.getElementById('btnViewList').classList.remove('active');
+  renderGrid();
+});
+document.getElementById('btnViewList').addEventListener('click', ()=>{
+  STATE.viewMode = 'list';
+  document.getElementById('btnViewList').classList.add('active');
+  document.getElementById('btnViewCards').classList.remove('active');
   renderGrid();
 });
 
