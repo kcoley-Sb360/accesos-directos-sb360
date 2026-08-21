@@ -230,6 +230,14 @@
   .avatar img{width:100%;height:100%;object-fit:cover;}
   .card h3{margin:0;font-size:15.5px;font-weight:700;}
   .card .rol{color:var(--orange);font-size:12px;font-weight:700;}
+  .meta-line{color:var(--grey);font-size:12px;font-weight:500;}
+  .contact-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .contact-link{
+    font-size:11.5px;font-weight:700;color:var(--orange);
+    text-decoration:none;background:var(--orange-soft);
+    padding:3px 10px;border-radius:20px;
+  }
+  .contact-link:hover{background:var(--orange);color:#fff;}
   .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
   .tag{
     background:#F4F4F3;
@@ -349,12 +357,32 @@
       <input type="email" id="fEmail">
     </div>
     <div class="field">
+      <label>LinkedIn (URL del perfil)</label>
+      <input type="text" id="fLinkedIn" placeholder="https://linkedin.com/in/...">
+    </div>
+    <div class="field">
+      <label>WhatsApp</label>
+      <input type="text" id="fWhatsApp" placeholder="+507 6000-0000">
+    </div>
+    <div class="field">
       <label>Bio (opcional)</label>
       <textarea id="fBio"></textarea>
     </div>
     <div class="field">
       <label>Rol</label>
       <div class="checkbox-grid" id="fRol"></div>
+    </div>
+    <div class="field">
+      <label>Nacionalidad</label>
+      <select id="fNacionalidad"><option value="">— Sin especificar —</option></select>
+    </div>
+    <div class="field">
+      <label>País de residencia</label>
+      <select id="fPaisResidencia"><option value="">— Sin especificar —</option></select>
+    </div>
+    <div class="field">
+      <label>Idiomas</label>
+      <div class="checkbox-grid" id="fIdiomas"></div>
     </div>
     <div class="field">
       <label>Expertís</label>
@@ -389,20 +417,23 @@ const CONFIG = {
 };
 /* ======================================= */
 
-const CATEGORY_FIELDS = ['Rol','Expertis','Industria','PerfilObjetivo','DimensionEmpresa'];
+const CATEGORY_FIELDS = ['Rol','Expertis','Industria','PerfilObjetivo','DimensionEmpresa','Nacionalidad','PaisResidencia','Idiomas'];
 const CATEGORY_LABELS = {
   Rol:'Rol dentro del grupo',
   Expertis:'Expertís',
   Industria:'Industria',
   PerfilObjetivo:'Perfil objetivo',
-  DimensionEmpresa:'Dimensión de empresa'
+  DimensionEmpresa:'Dimensión de empresa',
+  Nacionalidad:'Nacionalidad',
+  PaisResidencia:'País de residencia',
+  Idiomas:'Idiomas'
 };
-const MULTI_FIELDS = ['Rol','Expertis','Industria','PerfilObjetivo','DimensionEmpresa'];
+const MULTI_FIELDS = ['Rol','Expertis','Industria','PerfilObjetivo','DimensionEmpresa','Idiomas'];
 
 let STATE = {
   ejecutores: [],
   categorias: {},
-  activeFilters: { Rol:[], Expertis:[], Industria:[], PerfilObjetivo:[], DimensionEmpresa:[] },
+  activeFilters: { Rol:[], Expertis:[], Industria:[], PerfilObjetivo:[], DimensionEmpresa:[], Nacionalidad:[], PaisResidencia:[], Idiomas:[] },
   searchTerm: '',
   editingId: null
 };
@@ -513,7 +544,12 @@ function renderGrid(){
           <div class="rol">${(m.Rol||[]).join(' · ')}</div>
         </div>
       </div>
+      ${(m.PaisResidencia || m.Nacionalidad) ? `<div class="meta-line">${[m.PaisResidencia, m.Nacionalidad].filter(Boolean).join(' · ')}</div>` : ''}
       ${(m.Expertis&&m.Expertis.length) ? `<div class="tags">${m.Expertis.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
+      ${(m.LinkedIn || m.WhatsApp) ? `<div class="contact-row">
+        ${m.LinkedIn ? `<a href="${m.LinkedIn}" target="_blank" rel="noopener" class="contact-link">LinkedIn</a>` : ''}
+        ${m.WhatsApp ? `<a href="https://wa.me/${(m.WhatsApp||'').replace(/[^\d]/g,'')}" target="_blank" rel="noopener" class="contact-link">WhatsApp</a>` : ''}
+      </div>` : ''}
       <div class="card-actions">
         <button onclick="openEdit('${m.ID}')">Editar</button>
         <button onclick="removeMentor('${m.ID}')">Eliminar</button>
@@ -531,6 +567,13 @@ function populateSelectOptions(){
       <label><input type="checkbox" value="${o}"> ${o}</label>
     `).join('');
   });
+
+  ['Nacionalidad','PaisResidencia'].forEach(field=>{
+    const select = document.getElementById('f'+field);
+    const opts = STATE.categorias[field] || [];
+    select.innerHTML = '<option value="">— Sin especificar —</option>' +
+      opts.map(o=>`<option value="${o}">${o}</option>`).join('');
+  });
 }
 
 function openAdd(){
@@ -539,8 +582,12 @@ function openAdd(){
   document.getElementById('fNombre').value='';
   document.getElementById('fFoto').value='';
   document.getElementById('fEmail').value='';
+  document.getElementById('fLinkedIn').value='';
+  document.getElementById('fWhatsApp').value='';
   document.getElementById('fBio').value='';
   populateSelectOptions();
+  document.getElementById('fNacionalidad').value='';
+  document.getElementById('fPaisResidencia').value='';
   document.getElementById('overlay').classList.add('show');
 }
 
@@ -553,7 +600,11 @@ function openEdit(id){
   document.getElementById('fNombre').value = m.Nombre||'';
   document.getElementById('fFoto').value = m.Foto||'';
   document.getElementById('fEmail').value = m.Email||'';
+  document.getElementById('fLinkedIn').value = m.LinkedIn||'';
+  document.getElementById('fWhatsApp').value = m.WhatsApp||'';
   document.getElementById('fBio').value = m.Bio||'';
+  document.getElementById('fNacionalidad').value = m.Nacionalidad||'';
+  document.getElementById('fPaisResidencia').value = m.PaisResidencia||'';
   MULTI_FIELDS.forEach(field=>{
     const vals = m[field]||[];
     document.querySelectorAll(`#f${field} input[type=checkbox]`).forEach(cb=>{
@@ -572,7 +623,11 @@ async function saveMentor(){
     Nombre: document.getElementById('fNombre').value.trim(),
     Foto: document.getElementById('fFoto').value.trim(),
     Email: document.getElementById('fEmail').value.trim(),
+    LinkedIn: document.getElementById('fLinkedIn').value.trim(),
+    WhatsApp: document.getElementById('fWhatsApp').value.trim(),
     Bio: document.getElementById('fBio').value.trim(),
+    Nacionalidad: document.getElementById('fNacionalidad').value,
+    PaisResidencia: document.getElementById('fPaisResidencia').value,
     Activo: 'TRUE'
   };
   if(!mentor.Nombre){ toast('El nombre es obligatorio'); return; }
