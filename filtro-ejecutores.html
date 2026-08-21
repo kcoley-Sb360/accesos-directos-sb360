@@ -161,8 +161,20 @@
     justify-content:space-between;
     align-items:center;
     color:var(--ink);
+    list-style:none;
   }
   .filter-group summary::-webkit-details-marker{display:none;}
+  .filter-group summary::marker{display:none;content:'';}
+  .filter-label-wrap{display:flex;align-items:center;gap:8px;}
+  .chevron{
+    color:var(--grey-light);
+    display:flex;
+    align-items:center;
+    flex-shrink:0;
+    margin-left:10px;
+    transition:transform .15s;
+  }
+  .filter-group[open] .chevron{transform:rotate(180deg);}
   .filter-count{
     background:var(--orange-soft);
     color:var(--orange);
@@ -508,6 +520,7 @@ let STATE = {
   ejecutores: [],
   categorias: {},
   activeFilters: { Rol:[], Expertis:[], Industria:[], PerfilObjetivo:[], DimensionEmpresa:[], Nacionalidad:[], PaisResidencia:[], Idiomas:[] },
+  openFilters: { Rol:false, Expertis:false, Industria:false, PerfilObjetivo:false, DimensionEmpresa:false, Nacionalidad:false, PaisResidencia:false, Idiomas:false },
   searchTerm: '',
   editingId: null,
   viewMode: 'cards',
@@ -561,9 +574,15 @@ function renderFilters(){
     const activeCount = STATE.activeFilters[field].length;
     const details = document.createElement('details');
     details.className = 'filter-group';
-    details.open = false;
+    details.open = !!STATE.openFilters[field];
     details.innerHTML = `
-      <summary>${CATEGORY_LABELS[field]} ${activeCount ? `<span class="filter-count">${activeCount}</span>` : ''}</summary>
+      <summary>
+        <span class="filter-label-wrap">
+          ${CATEGORY_LABELS[field]}
+          ${activeCount ? `<span class="filter-count">${activeCount}</span>` : ''}
+        </span>
+        <span class="chevron"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </summary>
       <div class="filter-options">
         ${opts.map(o=>`
           <label>
@@ -572,6 +591,9 @@ function renderFilters(){
           </label>`).join('')}
       </div>
     `;
+    details.addEventListener('toggle', ()=>{
+      STATE.openFilters[field] = details.open;
+    });
     container.appendChild(details);
   });
   container.querySelectorAll('input[type=checkbox]').forEach(cb=>{
