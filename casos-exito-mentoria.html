@@ -1164,7 +1164,7 @@ function openAuthModal(type, id){
   const input = document.getElementById('authInput');
   document.getElementById('authTitle').textContent = isDelete ? 'Confirmar eliminación' : 'Confirmar edición';
   document.getElementById('authMessage').textContent = isDelete
-    ? 'Esta acción no se puede deshacer. Escribe la palabra "eliminar" para continuar.'
+    ? 'Esta acción no se puede deshacer. Escribe la palabra clave correspondiente a la acción para continuar.'
     : 'Ingresa tu palabra clave para editar este caso.';
   input.type = isDelete ? 'text' : 'password';
   input.value = '';
