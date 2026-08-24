@@ -571,6 +571,8 @@ body{
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:6px;font-weight:700;}
 .field .hint{display:block;font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:500;}
+.field .error-msg{display:block;min-height:15px;font-size:11.5px;color:#c0392b;margin-top:6px;font-weight:700;}
+.auth-modal{max-width:360px;}
 .field input[type=text], .field input[type=email], .field textarea, .field select{
   width:100%;background:var(--tag-bg);border:1px solid var(--border);
   color:var(--text);padding:10px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;
@@ -762,6 +764,22 @@ body{
   </div>
 </div>
 
+<!-- Modal: confirmación con palabra clave (editar / eliminar) -->
+<div class="overlay" id="authOverlay">
+  <div class="modal auth-modal">
+    <h2 id="authTitle">Confirmar acción</h2>
+    <div class="field">
+      <label id="authMessage">Ingresa la palabra clave para continuar.</label>
+      <input type="text" id="authInput" autocomplete="off">
+      <span class="error-msg" id="authError"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnAuthCancel">Cancelar</button>
+      <button class="btn btn-primary" id="btnAuthConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -779,6 +797,10 @@ const FILTER_FIELDS = [
 ];
 // Campos que se guardan como listas (múltiples valores) en una sola celda de Sheets
 const MULTI_FIELDS = ['Mentor', 'Duracion'];
+// Palabras clave aceptadas para poder editar una card
+const EDIT_KEYWORDS = ['ivan', 'kevin', 'marigaby', 'clara', 'fernando', 'anmyr'];
+// Palabra exacta requerida para poder eliminar una card
+const DELETE_KEYWORD = 'eliminar';
 /* ======================================= */
 
 let currentView = "cards"; // "cards" | "list"
@@ -1072,8 +1094,8 @@ function avatarTag(item){
 function actionsHtml(item, compact){
   return `<div class="card-actions">
     <button type="button" class="action-btn primary${compact ? "" : " full"}" onclick="openView('${item.ID}')">${eyeIconSvg()} Ver caso completo</button>
-    <button type="button" class="action-btn" onclick="openEdit('${item.ID}')">${editIconSvg()} Editar</button>
-    <button type="button" class="action-btn" onclick="removeMentoria('${item.ID}')">${trashIconSvg()} Eliminar</button>
+    <button type="button" class="action-btn" onclick="requestEdit('${item.ID}')">${editIconSvg()} Editar</button>
+    <button type="button" class="action-btn" onclick="requestDelete('${item.ID}')">${trashIconSvg()} Eliminar</button>
   </div>`;
 }
 
@@ -1124,6 +1146,58 @@ function openView(id){
 }
 function closeView(){
   document.getElementById("viewOverlay").classList.remove("show");
+}
+
+/* ===== Modal de autorización (palabra clave para editar/eliminar) ===== */
+let authAction = null; // { type: 'edit' | 'delete', id }
+
+function requestEdit(id){
+  openAuthModal('edit', id);
+}
+function requestDelete(id){
+  openAuthModal('delete', id);
+}
+
+function openAuthModal(type, id){
+  authAction = { type, id };
+  const isDelete = type === 'delete';
+  const input = document.getElementById('authInput');
+  document.getElementById('authTitle').textContent = isDelete ? 'Confirmar eliminación' : 'Confirmar edición';
+  document.getElementById('authMessage').textContent = isDelete
+    ? 'Esta acción no se puede deshacer. Escribe la palabra "eliminar" para continuar.'
+    : 'Ingresa tu palabra clave para editar este caso.';
+  input.type = isDelete ? 'text' : 'password';
+  input.value = '';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authOverlay').classList.add('show');
+  setTimeout(() => input.focus(), 0);
+}
+
+function closeAuthModal(){
+  document.getElementById('authOverlay').classList.remove('show');
+  authAction = null;
+}
+
+function confirmAuth(){
+  if(!authAction) return;
+  const { type, id } = authAction;
+  const value = normalize(document.getElementById('authInput').value.trim());
+
+  if(type === 'delete'){
+    if(value !== DELETE_KEYWORD){
+      document.getElementById('authError').textContent = 'Palabra incorrecta. Escribe "eliminar" para continuar.';
+      return;
+    }
+    closeAuthModal();
+    performDelete(id);
+  } else {
+    if(!EDIT_KEYWORDS.includes(value)){
+      document.getElementById('authError').textContent = 'Palabra clave no reconocida.';
+      return;
+    }
+    closeAuthModal();
+    openEdit(id);
+  }
 }
 
 /* ===== Modal / CRUD ===== */
@@ -1207,8 +1281,7 @@ async function saveMentoria(){
   }
 }
 
-async function removeMentoria(id){
-  if(!confirm("¿Eliminar este caso? Esta acción no se puede deshacer.")) return;
+async function performDelete(id){
   try{
     await apiPost({ action: "delete", id });
     toast("Caso eliminado");
@@ -1225,6 +1298,11 @@ document.getElementById("btnSave").addEventListener("click", saveMentoria);
 document.getElementById("overlay").addEventListener("click", e => { if(e.target.id === "overlay") closeModal(); });
 document.getElementById("btnCloseView").addEventListener("click", closeView);
 document.getElementById("viewOverlay").addEventListener("click", e => { if(e.target.id === "viewOverlay") closeView(); });
+
+document.getElementById("btnAuthCancel").addEventListener("click", closeAuthModal);
+document.getElementById("btnAuthConfirm").addEventListener("click", confirmAuth);
+document.getElementById("authOverlay").addEventListener("click", e => { if(e.target.id === "authOverlay") closeAuthModal(); });
+document.getElementById("authInput").addEventListener("keydown", e => { if(e.key === "Enter") confirmAuth(); });
 
 document.getElementById("btnCards").addEventListener("click", () => setView("cards"));
 document.getElementById("btnList").addEventListener("click", () => setView("list"));
