@@ -573,7 +573,7 @@ body{
 .field .hint{display:block;font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:500;}
 .field .error-msg{display:block;min-height:15px;font-size:11.5px;color:#c0392b;margin-top:6px;font-weight:700;}
 .auth-modal{max-width:360px;}
-.field input[type=text], .field input[type=email], .field textarea, .field select{
+.field input[type=text], .field input[type=email], .field input[type=password], .field textarea, .field select{
   width:100%;background:var(--tag-bg);border:1px solid var(--border);
   color:var(--text);padding:10px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;
 }
@@ -1164,7 +1164,7 @@ function openAuthModal(type, id){
   const input = document.getElementById('authInput');
   document.getElementById('authTitle').textContent = isDelete ? 'Confirmar eliminación' : 'Confirmar edición';
   document.getElementById('authMessage').textContent = isDelete
-    ? 'Esta acción no se puede deshacer. Escribe la palabra clave correspondiente a la acción para continuar.'
+    ? 'Esta acción no se puede deshacer. Escribe la palabra "eliminar" para continuar.'
     : 'Ingresa tu palabra clave para editar este caso.';
   input.type = isDelete ? 'text' : 'password';
   input.value = '';
