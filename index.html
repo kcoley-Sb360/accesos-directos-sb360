@@ -540,12 +540,12 @@ html.sb-unlocked .gate-overlay{
   const GATE_VERSION = window.SB360_GATE_VERSION || "1";
 
   // Hashes SHA-256 de las palabras aceptadas (minúsculas, sin espacios al
-  // inicio/final). Estos 3 son PLACEHOLDERS de ejemplo — reemplázalos por
-  // los tuyos siguiendo las instrucciones de arriba antes de publicar.
+  // inicio/final). No dejes la palabra en texto plano aquí al lado del
+  // hash (ni en un comentario): eso anularía el propósito de hashear.
   const ACCEPTED_HASHES = [
-    "3f22564d28659d8403645c90d9edaa48c974b954b3b347ab26d1b5c31fe3ef19", // "cambia-esta-palabra-1"
-    "30c0a7ff911a165a932e185be38aafcbb2bf516713fad33a5606bcf4c4797510", // "cambia-esta-palabra-2"
-    "9338e0f14bbe06019cb3692840eda4c8e842e17584321ec3dc58057678a0e09a", // "cambia-esta-palabra-3"
+    "1a6bea66c105bd8d6f2dbaeec134b6d4ecbc7ace6d6d4fc9242e91b9ee16461f",
+    "82c541c6216c1aabb393265c1b7c4afd249d356fc07d8267ffb5e5453b380224",
+    "ff7f4b05b7380f86e87e3e102c2302e5cd98b96027eec7ca5146acd7b776f98d",
   ];
 
   async function sb360Hash(str){
