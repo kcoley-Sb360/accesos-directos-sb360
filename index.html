@@ -8,6 +8,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* GATE_VERSION vive aquí porque este script corre primero. Súbela (ej. "2")
+   el día que quieras que TODOS los navegadores vuelvan a pedir la palabra
+   de acceso (por ejemplo, si alguien dejó la empresa). El otro script del
+   gate, al final del documento, lee este mismo valor. */
+window.SB360_GATE_VERSION = "1";
+/* Evita el parpadeo de contenido: si este navegador ya desbloqueó el acceso
+   con la versión vigente, marca <html> de inmediato, antes de pintar nada. */
+(function(){
+  try{
+    if(localStorage.getItem("sb360_gate") === window.SB360_GATE_VERSION){
+      document.documentElement.classList.add("sb-unlocked");
+    }
+  }catch(e){/* localStorage no disponible (modo privado, etc.) */}
+})();
+</script>
 <style>
 html{
   scrollbar-gutter: stable;
@@ -332,9 +348,109 @@ html{
     .layout{flex-direction:column;}
     .filters{width:100%;position:static;max-height:none;}
   }
+
+/* ================= GATE DE ACCESO ================= */
+html:not(.sb-unlocked) body{
+  overflow:hidden;
+}
+html:not(.sb-unlocked) .page{
+  display:none;
+}
+html.sb-unlocked .gate-overlay{
+  display:none;
+}
+.gate-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:var(--bg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.gate-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  padding:36px 32px;
+  max-width:340px;
+  width:100%;
+  text-align:center;
+}
+.gate-icon{
+  color:var(--accent);
+  margin:0 auto 14px;
+  display:block;
+}
+.gate-card h2{
+  margin:0 0 6px;
+  font-size:18px;
+  font-weight:700;
+  color:var(--text);
+}
+.gate-card p{
+  margin:0 0 20px;
+  font-size:13px;
+  color:var(--text-muted);
+}
+.gate-input{
+  width:100%;
+  padding:11px 14px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  outline:none;
+  transition:border-color .15s ease;
+  margin-bottom:10px;
+}
+.gate-input:focus{
+  border-color:var(--accent);
+}
+.gate-btn{
+  width:100%;
+  padding:11px 14px;
+  border:none;
+  border-radius:var(--radius-sm);
+  background:var(--accent);
+  color:#fff;
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.gate-btn:hover{
+  background:var(--accent-dark);
+}
+.gate-btn:disabled{
+  opacity:.6;
+  cursor:default;
+}
+.gate-error{
+  margin-top:12px;
+  font-size:12.5px;
+  color:var(--accent-dark);
+  min-height:16px;
+}
 </style>
 </head>
 <body>
+
+<div class="gate-overlay" id="gateOverlay">
+  <div class="gate-card">
+    <svg class="gate-icon" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <h2>Acceso restringido</h2>
+    <p>Ingresa la palabra de acceso de SalesBox360 para continuar.</p>
+    <form id="gateForm" autocomplete="off">
+      <input type="password" id="gateInput" class="gate-input" placeholder="Palabra de acceso" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button type="submit" class="gate-btn" id="gateBtn">Ingresar</button>
+      <div class="gate-error" id="gateError"></div>
+    </form>
+  </div>
+</div>
  
 <div class="page">
  
@@ -398,6 +514,79 @@ html{
 <div class="toast" id="toast"></div>
  
 <script>
+/* =========================================================================
+   GATE DE ACCESO
+   -------------------------------------------------------------------------
+   No sustituye un login real: es una barrera para que un curioso que se
+   tope con el link no vea el listado, no un candado a prueba de alguien
+   con conocimientos técnicos (el código sigue siendo público en GitHub
+   Pages y se puede inspeccionar). Sirve para el caso de uso descrito:
+   filtrar "randoms" que caen en la URL, no visitantes motivados.
+
+   PARA AGREGAR / QUITAR / ROTAR PALABRAS:
+   1) Abre esta página ya publicada en el navegador, abre la consola (F12)
+      y ejecuta:  await sb360Hash("la-palabra-que-quieras")
+   2) Copia el hash que te devuelve y agrégalo (o reemplaza uno) en el
+      arreglo ACCEPTED_HASHES de abajo.
+   3) Si quieres que TODOS los que ya tenían acceso guardado en su
+      navegador vuelvan a pedir la palabra (por ejemplo, alguien dejó la
+      empresa y quieres invalidar su acceso), sube el número en
+      SB360_GATE_VERSION (arriba, en el <head>) y en GATE_VERSION (abajo);
+      deben ser siempre el mismo valor.
+   Requiere HTTPS (funciona en GitHub Pages); no funcionará abriendo el
+   archivo localmente con file://.
+   ========================================================================= */
+(function(){
+  const GATE_VERSION = window.SB360_GATE_VERSION || "1";
+
+  // Hashes SHA-256 de las palabras aceptadas (minúsculas, sin espacios al
+  // inicio/final). Estos 3 son PLACEHOLDERS de ejemplo — reemplázalos por
+  // los tuyos siguiendo las instrucciones de arriba antes de publicar.
+  const ACCEPTED_HASHES = [
+    "3f22564d28659d8403645c90d9edaa48c974b954b3b347ab26d1b5c31fe3ef19", // "cambia-esta-palabra-1"
+    "30c0a7ff911a165a932e185be38aafcbb2bf516713fad33a5606bcf4c4797510", // "cambia-esta-palabra-2"
+    "9338e0f14bbe06019cb3692840eda4c8e842e17584321ec3dc58057678a0e09a", // "cambia-esta-palabra-3"
+  ];
+
+  async function sb360Hash(str){
+    const enc = new TextEncoder().encode(String(str).trim().toLowerCase());
+    const buf = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  window.sb360Hash = sb360Hash; // utilidad para generar hashes desde la consola
+
+  if(document.documentElement.classList.contains("sb-unlocked")){
+    return; // ya desbloqueado en una visita anterior, nada que hacer
+  }
+
+  const gateForm = document.getElementById("gateForm");
+  const gateInput = document.getElementById("gateInput");
+  const gateError = document.getElementById("gateError");
+  const gateBtn = document.getElementById("gateBtn");
+
+  gateForm.addEventListener("submit", async function(e){
+    e.preventDefault();
+    if(!gateInput.value.trim()) return;
+    gateBtn.disabled = true;
+    try{
+      const hash = await sb360Hash(gateInput.value);
+      if(ACCEPTED_HASHES.includes(hash)){
+        try{ localStorage.setItem("sb360_gate", GATE_VERSION); }catch(e){}
+        document.documentElement.classList.add("sb-unlocked");
+      } else {
+        gateError.textContent = "Palabra incorrecta. Intenta de nuevo.";
+        gateInput.value = "";
+        gateInput.focus();
+      }
+    } catch(err){
+      gateError.textContent = "Este navegador no soporta la verificación (requiere HTTPS).";
+    } finally {
+      gateBtn.disabled = false;
+    }
+  });
+
+  gateInput.focus();
+})();
 /* =========================================================================
    CONFIGURACIÓN
    -------------------------------------------------------------------------
