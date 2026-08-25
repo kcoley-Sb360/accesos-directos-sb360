@@ -344,12 +344,14 @@
   .modal h2{margin-top:0;font-size:18px;font-weight:800;}
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:12.5px;color:var(--grey);margin-bottom:6px;font-weight:700;}
-  .field input[type=text], .field input[type=email], .field textarea, .field select{
+  .field input[type=text], .field input[type=email], .field input[type=password], .field textarea, .field select{
     width:100%;background:#FAFAF9;border:1px solid var(--border);
     color:var(--ink);padding:10px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;
   }
   .field input:focus, .field textarea:focus{outline:none;border-color:var(--orange);}
   .field textarea{resize:vertical;min-height:60px;}
+  .field .error-msg{display:block;min-height:15px;font-size:11.5px;color:#c0392b;margin-top:6px;font-weight:700;}
+  .auth-modal{max-width:360px;}
   .checkbox-grid{
     display:grid;grid-template-columns:repeat(2,1fr);gap:6px;
     max-height:150px;overflow-y:auto;background:#FAFAF9;
@@ -493,6 +495,22 @@
   </div>
 </div>
 
+<!-- Modal: confirmación con palabra clave (editar / eliminar) -->
+<div class="overlay" id="authOverlay">
+  <div class="modal auth-modal">
+    <h2 id="authTitle">Confirmar acción</h2>
+    <div class="field">
+      <label id="authMessage">Ingresa la palabra clave para continuar.</label>
+      <input type="text" id="authInput" autocomplete="off">
+      <span class="error-msg" id="authError"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="btnAuthCancel">Cancelar</button>
+      <button class="btn" id="btnAuthConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -515,6 +533,10 @@ const CATEGORY_LABELS = {
   Idiomas:'Idiomas'
 };
 const MULTI_FIELDS = ['Rol','Expertis','Industria','PerfilObjetivo','DimensionEmpresa','Idiomas'];
+// Palabras clave aceptadas para poder editar una card
+const EDIT_KEYWORDS = ['ivan', 'kevin', 'marigaby', 'clara', 'fernando', 'anmyr'];
+// Palabra exacta requerida para poder eliminar una card
+const DELETE_KEYWORD = 'eliminar';
 
 let STATE = {
   ejecutores: [],
@@ -671,12 +693,68 @@ function renderGrid(){
         ${contactButton('Email', emailHref)}
       </div>
       <div class="card-actions">
-        <button onclick="openEdit('${m.ID}')">Editar</button>
-        <button onclick="removeMentor('${m.ID}')">Eliminar</button>
+        <button onclick="requestEdit('${m.ID}')">Editar</button>
+        <button onclick="requestDelete('${m.ID}')">Eliminar</button>
       </div>
     </div>
   `;
   }).join('');
+}
+
+/* ===== Modal de autorización (palabra clave para editar/eliminar) ===== */
+let authAction = null; // { type: 'edit' | 'delete', id }
+
+function normalizeKeyword(str){
+  return (str||'').trim().toLowerCase();
+}
+
+function requestEdit(id){
+  openAuthModal('edit', id);
+}
+function requestDelete(id){
+  openAuthModal('delete', id);
+}
+
+function openAuthModal(type, id){
+  authAction = { type, id };
+  const isDelete = type === 'delete';
+  const input = document.getElementById('authInput');
+  document.getElementById('authTitle').textContent = isDelete ? 'Confirmar eliminación' : 'Confirmar edición';
+  document.getElementById('authMessage').textContent = isDelete
+    ? 'Esta acción no se puede deshacer. Escribe la palabra clave correspondiente a la acción para continuar.'
+    : 'Ingresa tu palabra clave para editar este caso.';
+  input.type = isDelete ? 'text' : 'password';
+  input.value = '';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authOverlay').classList.add('show');
+  setTimeout(() => input.focus(), 0);
+}
+
+function closeAuthModal(){
+  document.getElementById('authOverlay').classList.remove('show');
+  authAction = null;
+}
+
+function confirmAuth(){
+  if(!authAction) return;
+  const { type, id } = authAction;
+  const value = normalizeKeyword(document.getElementById('authInput').value);
+
+  if(type === 'delete'){
+    if(value !== DELETE_KEYWORD){
+      document.getElementById('authError').textContent = 'Palabra incorrecta. Escribe "eliminar" para continuar.';
+      return;
+    }
+    closeAuthModal();
+    performDelete(id);
+  } else {
+    if(!EDIT_KEYWORDS.includes(value)){
+      document.getElementById('authError').textContent = 'Palabra clave no reconocida.';
+      return;
+    }
+    closeAuthModal();
+    openEdit(id);
+  }
 }
 
 /* ===== Modal / CRUD ===== */
@@ -778,8 +856,7 @@ async function saveMentor(){
   }
 }
 
-async function removeMentor(id){
-  if(!confirm('¿Eliminar este ejecutor? Esta acción no se puede deshacer.')) return;
+async function performDelete(id){
   try{
     await apiPost({action:'delete', id});
     toast('Ejecutor eliminado');
@@ -795,6 +872,14 @@ document.getElementById('btnCancel').addEventListener('click', closeModal);
 document.getElementById('btnSave').addEventListener('click', saveMentor);
 document.getElementById('overlay').addEventListener('click', e=>{
   if(e.target.id==='overlay') closeModal();
+});
+document.getElementById('btnAuthCancel').addEventListener('click', closeAuthModal);
+document.getElementById('btnAuthConfirm').addEventListener('click', confirmAuth);
+document.getElementById('authOverlay').addEventListener('click', e=>{
+  if(e.target.id==='authOverlay') closeAuthModal();
+});
+document.getElementById('authInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') confirmAuth();
 });
 document.getElementById('btnClear').addEventListener('click', ()=>{
   CATEGORY_FIELDS.forEach(f=> STATE.activeFilters[f]=[]);
