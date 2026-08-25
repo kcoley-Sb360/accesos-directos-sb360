@@ -435,7 +435,7 @@ body{
   font-weight:800;color:var(--accent);font-size:15px;
   flex-shrink:0;overflow:hidden;
 }
-.logo-box img{width:100%;height:100%;object-fit:contain;background:#fff;}
+.logo-box img{width:100%;height:100%;object-fit:contain;padding:4px;background:#fff;}
 .card-top .item-name{
   font-size:15px;
   font-weight:700;
@@ -550,7 +550,9 @@ body{
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12.5px;color:var(--text-muted);margin-bottom:6px;font-weight:700;}
 .field .hint{display:block;font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:500;}
-.field input[type=text], .field input[type=email], .field textarea, .field select{
+.field .error-msg{display:block;min-height:15px;font-size:11.5px;color:#c0392b;margin-top:6px;font-weight:700;}
+.auth-modal{max-width:360px;}
+.field input[type=text], .field input[type=email], .field input[type=password], .field textarea, .field select{
   width:100%;background:var(--tag-bg);border:1px solid var(--border);
   color:var(--text);padding:10px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px;
 }
@@ -590,6 +592,39 @@ body{
 .gallery img{
   width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:var(--radius-sm);
   cursor:pointer;border:1px solid var(--border);
+}
+
+/* ---------- Lightbox de fotos ---------- */
+.lightbox-overlay{background:rgba(15,15,15,.92);}
+.lightbox{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  max-width:min(92vw,900px);max-height:88vh;
+}
+.lightbox img{
+  max-width:100%;max-height:88vh;object-fit:contain;
+  border-radius:var(--radius-sm);box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+.lightbox-close{
+  position:absolute;top:-42px;right:0;background:transparent;border:none;
+  color:#fff;font-size:30px;line-height:1;cursor:pointer;padding:4px 8px;
+}
+.lightbox-nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  background:rgba(0,0,0,.45);border:none;color:#fff;font-size:18px;
+  width:40px;height:40px;border-radius:50%;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.lightbox-nav:hover{background:rgba(0,0,0,.65);}
+.lightbox-prev{left:-54px;}
+.lightbox-next{right:-54px;}
+.lightbox-counter{
+  position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);
+  color:#fff;font-size:12.5px;font-weight:600;letter-spacing:.3px;
+}
+@media (max-width:760px){
+  .lightbox-prev{left:6px;}
+  .lightbox-next{right:6px;}
+  .lightbox-close{top:6px;right:6px;background:rgba(0,0,0,.45);border-radius:50%;width:34px;height:34px;font-size:22px;}
 }
 
 ::-webkit-scrollbar{width:8px;}
@@ -737,6 +772,34 @@ body{
   </div>
 </div>
 
+<!-- Modal: preview de foto (lightbox) -->
+<div class="overlay lightbox-overlay" id="lightboxOverlay">
+  <div class="lightbox">
+    <button type="button" class="lightbox-close" id="btnLightboxClose" aria-label="Cerrar">&times;</button>
+    <button type="button" class="lightbox-nav lightbox-prev" id="btnLightboxPrev" aria-label="Anterior">&#10094;</button>
+    <img id="lightboxImg" src="" alt="Foto de la experiencia">
+    <button type="button" class="lightbox-nav lightbox-next" id="btnLightboxNext" aria-label="Siguiente">&#10095;</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+  </div>
+</div>
+
+
+<!-- Modal: confirmación con palabra clave (editar / eliminar) -->
+<div class="overlay" id="authOverlay">
+  <div class="modal auth-modal">
+    <h2 id="authTitle">Confirmar acción</h2>
+    <div class="field">
+      <label id="authMessage">Ingresa la palabra clave para continuar.</label>
+      <input type="text" id="authInput" autocomplete="off">
+      <span class="error-msg" id="authError"></span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="btnAuthCancel">Cancelar</button>
+      <button class="btn btn-primary" id="btnAuthConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -753,6 +816,10 @@ const FILTER_FIELDS = [
 ];
 // Campos que se guardan como listas (múltiples valores) en una sola celda de Sheets
 const MULTI_FIELDS = ['Industria', 'Fotos'];
+// Palabras clave aceptadas para poder editar una card
+const EDIT_KEYWORDS = ['ivan', 'kevin', 'marigaby', 'clara', 'fernando', 'anmyr'];
+// Palabra exacta requerida para poder eliminar una card
+const DELETE_KEYWORD = 'eliminar';
 /* ======================================= */
 
 let currentView = "cards"; // "cards" | "list"
@@ -1049,8 +1116,8 @@ function logoTag(item){
 function actionsHtml(item, compact){
   return `<div class="card-actions">
     <button type="button" class="action-btn primary${compact ? "" : " full"}" onclick="openView('${item.ID}')">${eyeIconSvg()} Ver caso completo</button>
-    <button type="button" class="action-btn" onclick="openEdit('${item.ID}')">${editIconSvg()} Editar</button>
-    <button type="button" class="action-btn" onclick="removeCaso('${item.ID}')">${trashIconSvg()} Eliminar</button>
+    <button type="button" class="action-btn" onclick="requestEdit('${item.ID}')">${editIconSvg()} Editar</button>
+    <button type="button" class="action-btn" onclick="requestDelete('${item.ID}')">${trashIconSvg()} Eliminar</button>
   </div>`;
 }
 
@@ -1080,6 +1147,92 @@ function rowHtml(item){
     </div>`;
 }
 
+/* ===== Modal de autorización (palabra clave para editar/eliminar) ===== */
+let authAction = null; // { type: 'edit' | 'delete', id }
+
+function requestEdit(id){
+  openAuthModal('edit', id);
+}
+function requestDelete(id){
+  openAuthModal('delete', id);
+}
+
+function openAuthModal(type, id){
+  authAction = { type, id };
+  const isDelete = type === 'delete';
+  const input = document.getElementById('authInput');
+  document.getElementById('authTitle').textContent = isDelete ? 'Confirmar eliminación' : 'Confirmar edición';
+  document.getElementById('authMessage').textContent = isDelete
+    ? 'Esta acción no se puede deshacer. Escribe la palabra clave correspondiente a la acción para continuar.'
+    : 'Ingresa tu palabra clave para editar este caso.';
+  input.type = isDelete ? 'text' : 'password';
+  input.value = '';
+  document.getElementById('authError').textContent = '';
+  document.getElementById('authOverlay').classList.add('show');
+  setTimeout(() => input.focus(), 0);
+}
+
+function closeAuthModal(){
+  document.getElementById('authOverlay').classList.remove('show');
+  authAction = null;
+}
+
+function confirmAuth(){
+  if(!authAction) return;
+  const { type, id } = authAction;
+  const value = normalize(document.getElementById('authInput').value.trim());
+
+  if(type === 'delete'){
+    if(value !== DELETE_KEYWORD){
+      document.getElementById('authError').textContent = 'Palabra incorrecta. Escribe "eliminar" para continuar.';
+      return;
+    }
+    closeAuthModal();
+    performDelete(id);
+  } else {
+    if(!EDIT_KEYWORDS.includes(value)){
+      document.getElementById('authError').textContent = 'Palabra clave no reconocida.';
+      return;
+    }
+    closeAuthModal();
+    openEdit(id);
+  }
+}
+
+/* ===== Lightbox de fotos ===== */
+let currentGalleryFotos = [];
+let lightboxIndex = 0;
+
+function openLightbox(index){
+  lightboxIndex = index;
+  renderLightbox();
+  document.getElementById("lightboxOverlay").classList.add("show");
+}
+
+function renderLightbox(){
+  document.getElementById("lightboxImg").src = currentGalleryFotos[lightboxIndex] || "";
+  const showNav = currentGalleryFotos.length > 1;
+  document.getElementById("btnLightboxPrev").style.display = showNav ? "" : "none";
+  document.getElementById("btnLightboxNext").style.display = showNav ? "" : "none";
+  document.getElementById("lightboxCounter").textContent = showNav
+    ? `${lightboxIndex + 1} / ${currentGalleryFotos.length}` : "";
+}
+
+function closeLightbox(){
+  document.getElementById("lightboxOverlay").classList.remove("show");
+  document.getElementById("lightboxImg").src = "";
+}
+
+function lightboxPrev(){
+  lightboxIndex = (lightboxIndex - 1 + currentGalleryFotos.length) % currentGalleryFotos.length;
+  renderLightbox();
+}
+
+function lightboxNext(){
+  lightboxIndex = (lightboxIndex + 1) % currentGalleryFotos.length;
+  renderLightbox();
+}
+
 /* ===== Modal de vista (solo lectura) ===== */
 function openView(id){
   const c = allItems.find(x => x.ID === id);
@@ -1091,10 +1244,11 @@ function openView(id){
   document.getElementById("viewQueLogramos").textContent = c.QueLogramos || "—";
 
   const fotos = c.Fotos || [];
+  currentGalleryFotos = fotos;
   const gallerySection = document.getElementById("viewGallerySection");
   if(fotos.length){
     gallerySection.style.display = "";
-    document.getElementById("viewGallery").innerHTML = fotos.map(f => `<img src="${f}" onclick="window.open('${f}','_blank')">`).join("");
+    document.getElementById("viewGallery").innerHTML = fotos.map((f,i) => `<img src="${f}" onclick="openLightbox(${i})">`).join("");
   } else {
     gallerySection.style.display = "none";
   }
@@ -1180,8 +1334,7 @@ async function saveCaso(){
   }
 }
 
-async function removeCaso(id){
-  if(!confirm("¿Eliminar este caso? Esta acción no se puede deshacer.")) return;
+async function performDelete(id){
   try{
     await apiPost({ action: "delete", id });
     toast("Caso eliminado");
@@ -1198,6 +1351,22 @@ document.getElementById("btnSave").addEventListener("click", saveCaso);
 document.getElementById("overlay").addEventListener("click", e => { if(e.target.id === "overlay") closeModal(); });
 document.getElementById("btnCloseView").addEventListener("click", closeView);
 document.getElementById("viewOverlay").addEventListener("click", e => { if(e.target.id === "viewOverlay") closeView(); });
+
+document.getElementById("btnAuthCancel").addEventListener("click", closeAuthModal);
+document.getElementById("btnAuthConfirm").addEventListener("click", confirmAuth);
+document.getElementById("authOverlay").addEventListener("click", e => { if(e.target.id === "authOverlay") closeAuthModal(); });
+document.getElementById("authInput").addEventListener("keydown", e => { if(e.key === "Enter") confirmAuth(); });
+
+document.getElementById("btnLightboxClose").addEventListener("click", closeLightbox);
+document.getElementById("btnLightboxPrev").addEventListener("click", lightboxPrev);
+document.getElementById("btnLightboxNext").addEventListener("click", lightboxNext);
+document.getElementById("lightboxOverlay").addEventListener("click", e => { if(e.target.id === "lightboxOverlay") closeLightbox(); });
+document.addEventListener("keydown", e => {
+  if(!document.getElementById("lightboxOverlay").classList.contains("show")) return;
+  if(e.key === "Escape") closeLightbox();
+  else if(e.key === "ArrowLeft") lightboxPrev();
+  else if(e.key === "ArrowRight") lightboxNext();
+});
 
 document.getElementById("btnCards").addEventListener("click", () => setView("cards"));
 document.getElementById("btnList").addEventListener("click", () => setView("list"));
