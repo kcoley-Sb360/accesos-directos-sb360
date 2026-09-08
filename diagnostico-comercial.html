@@ -650,6 +650,18 @@ const SECTION1_DATA = [
     "La fuerza de venta tiene la disciplina de registrar su actividad comercial en formatos, CRM o similares",
     "Se cuenta con un plan de compensación e incentivos que estimula tanto la actividad como los resultados"
   ]},
+  { name:"Tecnología Comercial", items:[
+    "Se cuenta con agentes de IA, asistentes internos o soluciones de procesamiento documental (OCR/document intelligence) que ayudan al equipo comercial a resolver dudas, buscar información o ejecutar tareas repetitivas de forma automática",
+    "Los procesos clave de gestión comercial cuentan con flujos de trabajo digitales (workflows) y no dependen únicamente de Excel, correos o WhatsApp para su seguimiento",
+    "Los sistemas que utiliza el equipo comercial (CRM, ERP, WMS u otros) están debidamente integrados entre sí mediante APIs o middleware",
+    "La información comercial se registra y actualiza en los sistemas con un bajo nivel de errores o reprocesos por digitación manual",
+    "Se cuenta con dashboards o reportes de Business Intelligence que consolidan la información comercial para apoyar la toma de decisiones",
+    "El nivel de tecnología comercial actual permite sostener el crecimiento del negocio sin generar cuellos de botella en costos, tiempos de respuesta o servicio al cliente",
+    "Existe un plan o guía formal para la adopción de Inteligencia Artificial en la fuerza de venta",
+    "Se cuenta con aplicativos o herramientas de IA desarrollados a la medida para necesidades comerciales específicas",
+    "Los puntos de venta físicos cuentan con analítica de tráfico o conteo de personas (sensores, cámaras, IA) para medir con precisión el flujo de clientes que entra, sale y se desplaza por el espacio",
+    "El contenido digital y las pantallas en los puntos de venta físicos están conectados con datos de audiencia para convertir esos espacios en canales medibles y administrables"
+  ]},
   { name:"Cultura de Venta", items:[
     "La cultura organizacional está definida en un documento y de este emanan los comportamientos y actividades culturales",
     "Se puede decir que tenemos, sentimos y vivimos en una empresa con una \"cultura orientada a las ventas\"",
@@ -715,11 +727,11 @@ const SECTION2_DATA = [
     "Efectividad en generar ventas cruzadas"
   ]},
   { name:"Adopción IA", items:[
-    "Se tiene una gobernanza IA aterrizada y comunicada",
-    "Se cuenta con herramientas o aplicativos IA debidamente calibrados para gestión comercial",
-    "Se realizan inducciones de uso de IA para gestión comercial",
-    "Hay un plan de adopción IA debidamente aterrizado",
-    "La IA genera un impacto positivo en la productividad comercial"
+    "Nivel de uso de herramientas de IA por parte del equipo en sus tareas diarias de venta (prospección, seguimiento, propuestas)",
+    "Consistencia con la que el equipo aplica IA de forma similar entre sí, en lugar de que cada vendedor la use a su manera o no la use del todo",
+    "Calidad de los resultados que obtiene el equipo al apoyarse en IA para su gestión comercial",
+    "Rapidez con la que el equipo incorpora una herramienta de IA nueva a su forma de trabajar, una vez que se les presenta",
+    "Impacto que ha tenido el uso de IA en la productividad o resultados del equipo comercial, hasta ahora"
   ]}
 ];
 
@@ -727,7 +739,7 @@ const SECTION3_DEFAULT = [
   "Prospectar","Perfilar clientes","Comunicación","Manejo de reuniones comerciales",
   "Descubrimiento de necesidades","Persuasión","Negociación y cierre","Seguimiento comercial",
   "Postventa","Venta cruzada",
-  "Organización","Proactividad","Creatividad comercial"
+  "Organización","Uso de herramientas digitales de gestión","Adopción de IA en su gestión personal","Proactividad","Creatividad comercial"
 ];
 
 /* ============== DATA: INSIGHTS (conclusiones por categoría/competencia) ============== */
@@ -760,6 +772,11 @@ const S1_INSIGHTS = [
       "¿Qué pasa si un vendedor se va mañana — se pierde la información de sus clientes?",
       "¿Cómo saben, sin preguntarle al vendedor, qué tan activo está siendo esta semana?"
     ], kpis:["% de actividad comercial registrada en CRM o formato", "% de procesos de venta documentados y en uso", "Frecuencia de revisión de KPIs comerciales (veces/año)"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué tareas repetitivas o de búsqueda de información le quitan más tiempo al equipo hoy?",
+      "¿Qué pasaría si la empresa tuviera que crecer 30% sin agregar tecnología nueva al área comercial?",
+      "¿Cuánto le está costando hoy, en tiempo o errores, no tener estos procesos digitalizados?"
+    ], kpis:["% de procesos comerciales digitalizados (vs. manuales)", "Horas semanales dedicadas a tareas repetitivas o búsqueda de información", "% de reducción en errores de digitación tras digitalizar un proceso"], tipo:"Adopción de IA" },
   { questions:[
       "¿Cómo se celebra o reconoce un buen resultado de venta aquí?",
       "¿Qué tanto se habla de resultados de venta fuera de las reuniones formales?",
@@ -805,9 +822,9 @@ const S2_INSIGHTS = [
     ], kpis:["Nº promedio de productos/servicios por cliente", "% de clientes con más de un producto contratado", "Frecuencia de revisión de cartera para cross-selling (veces/año)"], tipo:"Proceso y herramientas" },
   { questions:[
       "¿Qué herramientas de IA está usando hoy el equipo comercial, si alguna?",
-      "¿Quién decide qué IA se adopta y cómo se comunica al equipo?",
-      "¿Qué pasaría si su competencia ya está usando IA para vender más rápido que ustedes?"
-    ], kpis:["% del equipo usando activamente herramientas de IA", "Nº de procesos comerciales apoyados por IA", "% de mejora en productividad atribuible a IA (autopercibido)"], tipo:"Adopción de IA" }
+      "¿Todo el equipo la usa de forma parecida, o cada quien a su manera (o no la usa)?",
+      "¿Qué resultado concreto le ha dado al equipo usar IA hasta ahora?"
+    ], kpis:["% del equipo usando activamente herramientas de IA", "% de vendedores usando IA de forma consistente (vs. esporádica)", "% de mejora en productividad atribuible a IA (autopercibido)"], tipo:"Adopción de IA" }
 ];
 
 const S3_INSIGHTS = [
@@ -856,6 +873,14 @@ const S3_INSIGHTS = [
       "¿Qué tan seguido se le pierde o retrasa una tarea comercial importante?"
     ], kpis:["% de actividad comercial registrada y al día", "Nº de tareas comerciales retrasadas por semana", "% de cumplimiento del plan semanal personal"], tipo:"Proceso y herramientas" },
   { questions:[
+      "¿Qué porcentaje de su gestión diaria queda registrada en el CRM o sistema oficial, versus en Excel, notas o memoria?",
+      "¿Qué le impide usar más la herramienta digital que la empresa ya tiene disponible?"
+    ], kpis:["% de actividad comercial registrada en el sistema oficial (vs. medios informales)", "Nº de clientes/oportunidades sin registrar en el sistema", "Tiempo promedio entre la actividad real y su registro digital"], tipo:"Proceso y herramientas" },
+  { questions:[
+      "¿Qué herramientas de IA usa hoy para preparar reuniones, redactar propuestas o investigar clientes, si alguna?",
+      "¿Qué tan cómodo se siente incorporando una herramienta de IA nueva a su rutina de venta?"
+    ], kpis:["Nº de tareas comerciales apoyadas con IA por semana", "Tiempo ahorrado semanalmente por el uso de IA (autopercibido)", "Nº de herramientas de IA usadas de forma habitual"], tipo:"Adopción de IA" },
+  { questions:[
       "¿Qué hace en un día con pocas reuniones agendadas?",
       "¿Qué tan seguido genera oportunidades sin que se las asignen?"
     ], kpis:["Nº de oportunidades autogeneradas por mes", "% de días con actividad comercial iniciada sin asignación", "Nº de iniciativas propuestas por el vendedor al trimestre"], tipo:"Acompañamiento sostenido" },
@@ -874,11 +899,11 @@ const THEME_GROUPS = [
   { name:"Negociación y cierre", s2:4, s3:[6] },
   { name:"Seguimiento comercial", s2:5, s3:[7] },
   { name:"Venta cruzada", s2:6, s3:[9] },
-  { name:"Adopción de Inteligencia Artificial", s2:7 },
-  { name:"Gestión y organización comercial", s1:3, s3:[10] },
+  { name:"Adopción de Inteligencia Artificial", s1:4, s2:7, s3:[12] },
+  { name:"Gestión y organización comercial", s1:3, s3:[10,11] },
   { name:"Liderazgo comercial", s1:1 },
   { name:"Formación del equipo", s1:2 },
-  { name:"Cultura y motivación comercial", s1:4 },
+  { name:"Cultura y motivación comercial", s1:5 },
   { name:"Estrategia comercial", s1:0 },
   { name:"Postventa", s3:[8] }
 ];
@@ -892,33 +917,33 @@ const SECTION_META = {
 const INTAKE_QUESTIONS = [
   { text:"¿Con quién vas a tener esta conversación?",
     options:[
-      { label:"Con el dueño, gerente general o gerente comercial (nivel estratégico)", weights:{1:2} },
-      { label:"Con el equipo comercial completo, en su gestión del día a día", weights:{2:2} },
-      { label:"Con un vendedor o líder de equipo en particular", weights:{3:2} }
+      { label:"Dueño o líder del negocio, con foco en visión y dirección estratégica", weights:{1:2} },
+      { label:"Líder o gerente comercial, con foco en la operación del equipo de ventas", weights:{2:2} },
+      { label:"Gerente o líder de RRHH, con foco en desarrollo y formación del equipo", weights:{3:2} }
     ]},
   { text:"¿Cuál es el objetivo principal de esta conversación?",
     options:[
       { label:"Entender la estructura y dirección comercial de la empresa", weights:{1:2} },
-      { label:"Diagnosticar el proceso de venta del equipo", weights:{2:2} },
-      { label:"Evaluar el desempeño de un vendedor específico", weights:{3:2} }
+      { label:"Diagnosticar el proceso de venta del equipo comercial", weights:{2:2} },
+      { label:"Entender el nivel general de competencias del equipo, de cara a un plan de formación", weights:{3:2} }
     ]},
-  { text:"¿La empresa ya tiene un equipo de ventas formal y estructurado?",
+  { text:"¿Qué situación motivó que el cliente aceptara esta conversación?",
     options:[
-      { label:"Sí, con procesos y roles claros", weights:{2:2} },
-      { label:"Tiene vendedores, pero sin procesos claros todavía", weights:{1:1, 2:1} },
-      { label:"No aplica — es una sola persona o un equipo muy pequeño", weights:{3:2} }
+      { label:"Inquietud del dueño sobre la dirección o estructura comercial de la empresa", weights:{1:2} },
+      { label:"Resultados de venta insuficientes o un proceso comercial que no está funcionando como debería", weights:{2:2} },
+      { label:"Interés en fortalecer o desarrollar las habilidades del equipo comercial", weights:{3:2} }
     ]},
-  { text:"¿A qué nivel de acceso tienes con el cliente en este momento?",
+  { text:"¿Cómo describirías el momento comercial actual de la empresa?",
     options:[
-      { label:"Solo una reunión corta con el dueño o gerente", weights:{1:2} },
-      { label:"Acceso al equipo de ventas para evaluarlo en conjunto", weights:{2:2} },
-      { label:"Sesión de mentoring o evaluación 1 a 1 con un vendedor", weights:{3:2} }
+      { label:"Está definiendo o replanteando su enfoque comercial general", weights:{1:2} },
+      { label:"Ya tiene un enfoque claro, pero la ejecución del equipo no está dando los resultados esperados", weights:{2:2} },
+      { label:"El enfoque y la ejecución están bien, pero hay brechas de habilidades que frenan el potencial del equipo", weights:{3:2} }
     ]},
   { text:"¿Qué decisión busca tomar el cliente después de esta conversación?",
     options:[
       { label:"Definir o ajustar su estrategia comercial", weights:{1:2} },
       { label:"Mejorar procesos y resultados del equipo de ventas", weights:{2:2} },
-      { label:"Desarrollar o mentorear a un vendedor específico", weights:{3:2} }
+      { label:"Entender el nivel de competencias de su equipo para decidir un plan de formación o desarrollo", weights:{3:2} }
     ]}
 ];
 function computeIntakeRecommendation(){
