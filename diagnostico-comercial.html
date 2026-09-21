@@ -384,14 +384,9 @@
      visual: Inter, paleta --naranja/--grafito, radios y sombra existentes.
      =================================================================== */
 
-  /* ---------- Navbar: marca/contexto + tabs ---------- */
-  .navbar-brand{display:flex;align-items:center;justify-content:flex-end;}
-  .navbar-context{
-    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;color:var(--gris);
-  }
-  .navbar-context:empty{display:none;}
-  /* si no hay contexto (nombre de empresa) ni tabs -> vista landing: ocultar la barra */
-  .navbar:has(.tabs:empty):has(.navbar-context:empty){display:none;}
+  /* ---------- Navbar: tabs ---------- */
+  /* si no hay tabs -> vista landing: ocultar la barra */
+  .navbar:has(.tabs:empty){display:none;}
   .tab-btn.nav-back{background:var(--fondo);}
 
   /* ---------- Landing: "Mis diagnósticos" (guardado en el navegador) ---------- */
@@ -587,9 +582,6 @@
 
   <div class="navbar">
     <div class="navbar-inner">
-      <div class="navbar-brand">
-        <span class="navbar-context" id="navbar-context"></span>
-      </div>
       <div class="tabs" id="tabs"></div>
     </div>
   </div>
@@ -1207,8 +1199,6 @@ function showMessageModal(message){
 /* ============== RENDER: NAV ============== */
 function renderNav(){
   const tabsEl = document.getElementById('tabs');
-  const ctx = document.getElementById('navbar-context');
-  ctx.textContent = (appView==='case' && state && state.header.empresa) ? state.header.empresa : '';
   document.body.classList.toggle('view-landing', appView==='landing');
 
   if(appView==='landing'){
