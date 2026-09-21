@@ -1959,7 +1959,23 @@ async function exportPdf(sectionKey, titleForFile){
   const node = document.getElementById('capture-' + sectionKey);
   node.classList.add('capturing');
   node.querySelectorAll('input[type=text], input[type=date]').forEach(inp=>{ inp.setAttribute('value', inp.value); });
-  node.querySelectorAll('textarea').forEach(ta=>{ ta.textContent = ta.value; });
+  // html2canvas no ajusta el texto de un <textarea> a varias líneas: lo pinta como una sola línea
+  // (por eso el brief se veía cortado en el PDF aunque en pantalla se viera bien). Se reemplaza cada
+  // textarea, solo durante la captura, por un <div> visualmente idéntico con el mismo texto: al ser
+  // un elemento normal (no un "replaced element" de formulario), html2canvas sí lo ajusta línea por línea.
+  const textareaSwaps = [];
+  node.querySelectorAll('textarea').forEach(ta=>{
+    const div = document.createElement('div');
+    div.className = ta.className;
+    div.style.whiteSpace = 'pre-wrap';
+    div.style.overflowWrap = 'break-word';
+    div.style.height = 'auto';
+    div.style.overflow = 'visible';
+    div.textContent = ta.value;
+    ta.insertAdjacentElement('afterend', div);
+    ta.style.display = 'none';
+    textareaSwaps.push({ ta, div });
+  });
   const btn = document.getElementById('export-' + sectionKey.slice(-1));
   const originalLabel = btn ? btn.textContent : null;
   if(btn){ btn.disabled = true; btn.textContent = "Generando PDF…"; }
@@ -1993,6 +2009,7 @@ async function exportPdf(sectionKey, titleForFile){
     console.error(err);
     alert("No se pudo generar la descarga automática del PDF en este entorno de vista previa.\n\nEsto suele pasar porque el panel de preview bloquea descargas.\n\nSolución: descarga este archivo HTML y ábrelo directamente en tu navegador (Chrome/Edge) — ahí la exportación a PDF funciona sin restricciones.");
   } finally {
+    textareaSwaps.forEach(({ta, div})=>{ div.remove(); ta.style.display = ''; });
     node.classList.remove('capturing');
     if(btn){ btn.disabled = false; btn.textContent = originalLabel; }
   }
